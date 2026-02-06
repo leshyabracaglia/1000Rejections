@@ -35,11 +35,11 @@ npm install
 
 ### Configuration
 
-Update the Supabase credentials in `lib/supabase.ts` with your own project URL and anon key:
+Create a `.env` file in the project root with your Supabase credentials:
 
-```ts
-const supabaseUrl = 'https://your-project.supabase.co';
-const supabaseAnonKey = 'your-anon-key';
+```
+EXPO_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+EXPO_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
 ```
 
 ### Running the App
