@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Pressable,
-  ActivityIndicator,
-  KeyboardAvoidingView,
-  Platform,
-} from 'react-native';
+import { View, Text, TextInput, Pressable, ActivityIndicator, KeyboardAvoidingView, Platform } from 'react-native';
 import { Link, router } from 'expo-router';
 import { useAuth } from '../../lib/auth';
-import { colors, fontSize, spacing } from '../../constants/theme';
+
+const t = {
+  bg: '#121212', surface: '#1E1E1E', primary: '#BB86FC', error: '#CF6679',
+  text: '#FFFFFF', textMuted: '#B3B3B3', border: '#333333', onPrimary: '#000000',
+};
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
@@ -22,8 +17,7 @@ export default function LoginScreen() {
 
   const handleLogin = async () => {
     if (!email.trim() || !password) {
-      setError('Please enter email and password');
-      return;
+      return setError('Please enter email and password');
     }
 
     setLoading(true);
@@ -40,136 +34,37 @@ export default function LoginScreen() {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={styles.container}
-      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-    >
-      <View style={styles.content}>
-        <Text style={styles.title}>1000 Rejections</Text>
-        <Text style={styles.subtitle}>Embrace rejection, build resilience</Text>
+    <KeyboardAvoidingView style={{ flex: 1, backgroundColor: t.bg }} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
+      <View style={{ flex: 1, justifyContent: 'center', paddingHorizontal: 24 }}>
+        <Text style={{ fontSize: 32, fontWeight: 'bold', color: t.primary, textAlign: 'center', marginBottom: 4 }}>1000 Rejections</Text>
+        <Text style={{ fontSize: 16, color: t.textMuted, textAlign: 'center', marginBottom: 32 }}>Embrace rejection, build resilience</Text>
 
-        <View style={styles.form}>
-          <TextInput
-            style={styles.input}
-            placeholder="Email"
-            placeholderTextColor={colors.textSecondary}
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            keyboardType="email-address"
-            autoCorrect={false}
-          />
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor={colors.textSecondary}
-            value={password}
-            onChangeText={setPassword}
-            secureTextEntry
-          />
+        <TextInput
+          style={{ backgroundColor: t.surface, borderRadius: 12, padding: 16, fontSize: 16, color: t.text, borderWidth: 1, borderColor: t.border, marginBottom: 16 }}
+          placeholder="Email" placeholderTextColor={t.textMuted} value={email} onChangeText={setEmail}
+          autoCapitalize="none" keyboardType="email-address" autoCorrect={false}
+        />
+        <TextInput
+          style={{ backgroundColor: t.surface, borderRadius: 12, padding: 16, fontSize: 16, color: t.text, borderWidth: 1, borderColor: t.border, marginBottom: 16 }}
+          placeholder="Password" placeholderTextColor={t.textMuted} value={password} onChangeText={setPassword} secureTextEntry
+        />
 
-          {error && <Text style={styles.error}>{error}</Text>}
+        {error && <Text style={{ color: t.error, fontSize: 14, textAlign: 'center', marginBottom: 16 }}>{error}</Text>}
 
-          <Pressable
-            style={({ pressed }) => [
-              styles.button,
-              pressed && styles.buttonPressed,
-              loading && styles.buttonDisabled,
-            ]}
-            onPress={handleLogin}
-            disabled={loading}
-          >
-            {loading ? (
-              <ActivityIndicator color={colors.onPrimary} />
-            ) : (
-              <Text style={styles.buttonText}>Sign In</Text>
-            )}
-          </Pressable>
+        <Pressable
+          style={{ backgroundColor: t.primary, borderRadius: 12, padding: 16, alignItems: 'center', opacity: loading ? 0.6 : 1 }}
+          onPress={handleLogin} disabled={loading}
+        >
+          {loading ? <ActivityIndicator color={t.onPrimary} /> : <Text style={{ color: t.onPrimary, fontSize: 16, fontWeight: '600' }}>Sign In</Text>}
+        </Pressable>
 
-          <View style={styles.footer}>
-            <Text style={styles.footerText}>Don't have an account? </Text>
-            <Link href="/(auth)/signup" asChild>
-              <Pressable>
-                <Text style={styles.link}>Sign Up</Text>
-              </Pressable>
-            </Link>
-          </View>
+        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 24 }}>
+          <Text style={{ color: t.textMuted, fontSize: 14 }}>Don't have an account? </Text>
+          <Link href="/(auth)/signup" asChild>
+            <Pressable><Text style={{ color: t.primary, fontSize: 14, fontWeight: '600' }}>Sign Up</Text></Pressable>
+          </Link>
         </View>
       </View>
     </KeyboardAvoidingView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-    paddingHorizontal: spacing.lg,
-  },
-  title: {
-    fontSize: fontSize.xxl,
-    fontWeight: 'bold',
-    color: colors.primary,
-    textAlign: 'center',
-    marginBottom: spacing.xs,
-  },
-  subtitle: {
-    fontSize: fontSize.md,
-    color: colors.textSecondary,
-    textAlign: 'center',
-    marginBottom: spacing.xl,
-  },
-  form: {
-    gap: spacing.md,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    fontSize: fontSize.md,
-    color: colors.onSurface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  error: {
-    color: colors.error,
-    fontSize: fontSize.sm,
-    textAlign: 'center',
-  },
-  button: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginTop: spacing.sm,
-  },
-  buttonPressed: {
-    opacity: 0.8,
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonText: {
-    color: colors.onPrimary,
-    fontSize: fontSize.md,
-    fontWeight: '600',
-  },
-  footer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    marginTop: spacing.lg,
-  },
-  footerText: {
-    color: colors.textSecondary,
-    fontSize: fontSize.sm,
-  },
-  link: {
-    color: colors.primary,
-    fontSize: fontSize.sm,
-    fontWeight: '600',
-  },
-});

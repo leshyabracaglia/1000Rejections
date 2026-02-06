@@ -1,17 +1,9 @@
 import React, { useState } from 'react';
-import {
-  View,
-  Text,
-  TextInput,
-  StyleSheet,
-  Pressable,
-  ScrollView,
-  Platform,
-  ActivityIndicator,
-} from 'react-native';
+import { View, Text, TextInput, Pressable, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { colors, fontSize, spacing } from '../constants/theme';
 import { ImagePickerButton } from './ImagePickerButton';
+
+const t = { surface: '#1E1E1E', primary: '#BB86FC', text: '#FFFFFF', textMuted: '#B3B3B3', border: '#333333', error: '#CF6679', onPrimary: '#000000' };
 
 interface RejectionFormProps {
   initialValues?: {
@@ -64,39 +56,39 @@ export function RejectionForm({ initialValues, onSubmit, submitLabel }: Rejectio
   });
 
   return (
-    <ScrollView style={styles.container} keyboardShouldPersistTaps="handled">
-      <View style={styles.field}>
-        <Text style={styles.label}>Title *</Text>
+    <ScrollView style={{ flex: 1, padding: 16 }} keyboardShouldPersistTaps="handled">
+      <View style={{ marginBottom: 16 }}>
+        <Text style={{ fontSize: 14, color: t.textMuted, marginBottom: 8 }}>Title *</Text>
         <TextInput
-          style={styles.input}
+          style={{ backgroundColor: t.surface, borderRadius: 12, padding: 16, fontSize: 16, color: t.text, borderWidth: 1, borderColor: t.border }}
           value={title}
           onChangeText={setTitle}
           placeholder="What were you rejected from?"
-          placeholderTextColor={colors.textSecondary}
+          placeholderTextColor={t.textMuted}
         />
       </View>
 
-      <View style={styles.field}>
-        <Text style={styles.label}>Description</Text>
+      <View style={{ marginBottom: 16 }}>
+        <Text style={{ fontSize: 14, color: t.textMuted, marginBottom: 8 }}>Description</Text>
         <TextInput
-          style={[styles.input, styles.textArea]}
+          style={{ backgroundColor: t.surface, borderRadius: 12, padding: 16, fontSize: 16, color: t.text, borderWidth: 1, borderColor: t.border, minHeight: 100 }}
           value={description}
           onChangeText={setDescription}
           placeholder="Tell the story of this rejection..."
-          placeholderTextColor={colors.textSecondary}
+          placeholderTextColor={t.textMuted}
           multiline
           numberOfLines={4}
           textAlignVertical="top"
         />
       </View>
 
-      <View style={styles.field}>
-        <Text style={styles.label}>Date</Text>
+      <View style={{ marginBottom: 16 }}>
+        <Text style={{ fontSize: 14, color: t.textMuted, marginBottom: 8 }}>Date</Text>
         <Pressable
-          style={styles.dateButton}
+          style={{ backgroundColor: t.surface, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.border }}
           onPress={() => setShowDatePicker(true)}
         >
-          <Text style={styles.dateText}>{formattedDate}</Text>
+          <Text style={{ fontSize: 16, color: t.text }}>{formattedDate}</Text>
         </Pressable>
         {showDatePicker && (
           <DateTimePicker
@@ -117,85 +109,19 @@ export function RejectionForm({ initialValues, onSubmit, submitLabel }: Rejectio
 
       <ImagePickerButton imageUri={imageUri} onImageSelected={setImageUri} />
 
-      {error && <Text style={styles.error}>{error}</Text>}
+      {error && <Text style={{ color: t.error, fontSize: 14, marginBottom: 16 }}>{error}</Text>}
 
       <Pressable
-        style={({ pressed }) => [
-          styles.submitButton,
-          pressed && styles.submitPressed,
-          loading && styles.submitDisabled,
-        ]}
+        style={({ pressed }) => ({ backgroundColor: t.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 16, marginBottom: 32, opacity: loading ? 0.6 : pressed ? 0.8 : 1 })}
         onPress={handleSubmit}
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color={colors.onPrimary} />
+          <ActivityIndicator color={t.onPrimary} />
         ) : (
-          <Text style={styles.submitText}>{submitLabel}</Text>
+          <Text style={{ color: t.onPrimary, fontSize: 16, fontWeight: '600' }}>{submitLabel}</Text>
         )}
       </Pressable>
     </ScrollView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    padding: spacing.md,
-  },
-  field: {
-    marginBottom: spacing.md,
-  },
-  label: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginBottom: spacing.sm,
-  },
-  input: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    fontSize: fontSize.md,
-    color: colors.onSurface,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  textArea: {
-    minHeight: 100,
-  },
-  dateButton: {
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    padding: spacing.md,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  dateText: {
-    fontSize: fontSize.md,
-    color: colors.onSurface,
-  },
-  error: {
-    color: colors.error,
-    fontSize: fontSize.sm,
-    marginBottom: spacing.md,
-  },
-  submitButton: {
-    backgroundColor: colors.primary,
-    borderRadius: 12,
-    padding: spacing.md,
-    alignItems: 'center',
-    marginTop: spacing.md,
-    marginBottom: spacing.xl,
-  },
-  submitPressed: {
-    opacity: 0.8,
-  },
-  submitDisabled: {
-    opacity: 0.6,
-  },
-  submitText: {
-    color: colors.onPrimary,
-    fontSize: fontSize.md,
-    fontWeight: '600',
-  },
-});

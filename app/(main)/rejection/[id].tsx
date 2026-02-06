@@ -1,13 +1,14 @@
 import React, { useEffect, useState } from 'react';
-import { View, StyleSheet, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, ActivityIndicator, Alert, Pressable } from 'react-native';
 import { useLocalSearchParams, router } from 'expo-router';
 import { supabase } from '../../../lib/supabase';
 import { useAuth } from '../../../lib/auth';
-import { colors } from '../../../constants/theme';
 import { RejectionForm } from '../../../components/RejectionForm';
 import { Rejection } from '../../../types';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
+
+const t = { bg: '#121212', primary: '#BB86FC', error: '#CF6679' };
 
 export default function EditRejectionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -109,43 +110,26 @@ export default function EditRejectionScreen() {
     router.back();
   };
 
-  if (loading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color={colors.primary} />
-      </View>
-    );
-  }
+  const handleDelete = () => Alert.alert('Delete Rejection', 'Are you sure?', [
+    { text: 'Cancel', style: 'cancel' },
+    {
+      text: 'Delete', style: 'destructive', onPress: async () => {
+        const { error } = await supabase.from('rejections').delete().eq('id', rejection?.id);
+        if (error) Alert.alert('Error', 'Failed to delete');
+        else router.back();
+      }
+    },
+  ]);
 
-  if (!rejection) {
-    return null;
-  }
+  if (loading) return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: t.bg }}><ActivityIndicator size="large" color={t.primary} /></View>;
+  if (!rejection) return null;
 
   return (
-    <View style={styles.container}>
-      <RejectionForm
-        initialValues={{
-          title: rejection.title,
-          description: rejection.description || '',
-          date: new Date(rejection.date),
-          imageUri: rejection.image_url,
-        }}
-        onSubmit={handleSubmit}
-        submitLabel="Save Changes"
-      />
+    <View style={{ flex: 1, backgroundColor: t.bg }}>
+      <RejectionForm initialValues={{ title: rejection.title, description: rejection.description || '', date: new Date(rejection.date), imageUri: rejection.image_url }} onSubmit={handleSubmit} submitLabel="Save Changes" />
+      <Pressable style={{ marginHorizontal: 16, marginBottom: 32, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: t.error, alignItems: 'center' }} onPress={handleDelete}>
+        <Text style={{ color: t.error, fontSize: 16, fontWeight: '600' }}>Delete Rejection</Text>
+      </Pressable>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.background,
-  },
-});

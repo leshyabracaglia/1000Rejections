@@ -1,22 +1,14 @@
-import React, { useCallback, useEffect, useState } from 'react';
-import {
-  View,
-  Text,
-  StyleSheet,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  ActivityIndicator,
-  Alert,
-} from 'react-native';
+import React, { useCallback, useState } from 'react';
+import { View, Text, FlatList, Pressable, RefreshControl, ActivityIndicator, Alert } from 'react-native';
 import { useFocusEffect, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth';
-import { colors, fontSize, spacing } from '../../constants/theme';
 import { Rejection } from '../../types';
 import { Counter } from '../../components/Counter';
 import { RejectionCard } from '../../components/RejectionCard';
+
+const t = { bg: '#121212', primary: '#BB86FC', text: '#FFFFFF', textMuted: '#B3B3B3', onPrimary: '#000000' };
 
 export default function HomeScreen() {
   const { user, signOut } = useAuth();
@@ -70,28 +62,24 @@ export default function HomeScreen() {
     ]);
   };
 
-  if (loading) {
-    return (
-      <SafeAreaView style={styles.container}>
-        <View style={styles.loadingContainer}>
-          <ActivityIndicator size="large" color={colors.primary} />
-        </View>
-      </SafeAreaView>
-    );
-  }
+  if (loading) return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: t.bg, justifyContent: 'center', alignItems: 'center' }}>
+      <ActivityIndicator size="large" color={t.primary} />
+    </SafeAreaView>
+  );
 
   return (
-    <SafeAreaView style={styles.container} edges={['top']}>
-      <View style={styles.header}>
-        <Text style={styles.title}>1000 Rejections</Text>
-        <Pressable onPress={handleSignOut} style={styles.signOutButton}>
-          <Text style={styles.signOutText}>Sign Out</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: t.bg }} edges={['top']}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8 }}>
+        <Text style={{ fontSize: 20, fontWeight: 'bold', color: t.primary }}>1000 Rejections</Text>
+        <Pressable onPress={handleSignOut} style={{ padding: 8 }}>
+          <Text style={{ color: t.textMuted, fontSize: 14 }}>Sign Out</Text>
         </Pressable>
       </View>
 
       <FlatList
         data={rejections}
-        keyExtractor={(item) => item.id}
+        keyExtractor={item => item.id}
         renderItem={({ item }) => (
           <RejectionCard
             rejection={item}
@@ -101,104 +89,21 @@ export default function HomeScreen() {
         )}
         ListHeaderComponent={<Counter count={rejections.length} />}
         ListEmptyComponent={
-          <View style={styles.emptyContainer}>
-            <Text style={styles.emptyTitle}>No rejections yet</Text>
-            <Text style={styles.emptyText}>
-              Start your journey! Add your first rejection.
-            </Text>
+          <View style={{ padding: 32, alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, fontWeight: '600', color: t.text, marginBottom: 8 }}>No rejections yet</Text>
+            <Text style={{ fontSize: 16, color: t.textMuted, textAlign: 'center' }}>Start your journey! Add your first rejection.</Text>
           </View>
         }
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary}
-          />
-        }
-        contentContainerStyle={styles.listContent}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchRejections(); }} tintColor={t.primary} />}
+        contentContainerStyle={{ paddingBottom: 100 }}
       />
 
       <Pressable
-        style={({ pressed }) => [styles.fab, pressed && styles.fabPressed]}
+        style={{ position: 'absolute', right: 24, bottom: 32, width: 64, height: 64, borderRadius: 32, backgroundColor: t.primary, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 8 }}
         onPress={() => router.push('/(main)/add')}
       >
-        <Text style={styles.fabText}>+</Text>
+        <Text style={{ fontSize: 32, color: t.onPrimary, fontWeight: '300', marginTop: -2 }}>+</Text>
       </Pressable>
     </SafeAreaView>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
-  },
-  title: {
-    fontSize: fontSize.xl,
-    fontWeight: 'bold',
-    color: colors.primary,
-  },
-  signOutButton: {
-    padding: spacing.sm,
-  },
-  signOutText: {
-    color: colors.textSecondary,
-    fontSize: fontSize.sm,
-  },
-  loadingContainer: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  listContent: {
-    paddingBottom: 100,
-  },
-  emptyContainer: {
-    padding: spacing.xl,
-    alignItems: 'center',
-  },
-  emptyTitle: {
-    fontSize: fontSize.lg,
-    fontWeight: '600',
-    color: colors.onSurface,
-    marginBottom: spacing.sm,
-  },
-  emptyText: {
-    fontSize: fontSize.md,
-    color: colors.textSecondary,
-    textAlign: 'center',
-  },
-  fab: {
-    position: 'absolute',
-    right: spacing.lg,
-    bottom: spacing.xl,
-    width: 60,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.primary,
-    justifyContent: 'center',
-    alignItems: 'center',
-    elevation: 8,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.3,
-    shadowRadius: 4,
-  },
-  fabPressed: {
-    opacity: 0.8,
-    transform: [{ scale: 0.95 }],
-  },
-  fabText: {
-    fontSize: 32,
-    color: colors.onPrimary,
-    fontWeight: '300',
-    marginTop: -2,
-  },
-});

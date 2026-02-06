@@ -1,0 +1,13 @@
+appId: com.rejections.tracker
+---
+- launchApp
+- assertVisible:
+    text: "rejections this year"
+    timeout: 10000
+- tapOn: "E2E Updated Rejection"
+- tapOn: "Delete Rejection"
+- assertVisible: "Are you sure?"
+- tapOn: "Delete"
+- assertNotVisible:
+    text: "E2E Updated Rejection"
+    timeout: 5000

@@ -1,0 +1,16 @@
+appId: com.rejections.tracker
+---
+- launchApp
+- assertVisible:
+    text: "rejections this year"
+    timeout: 10000
+- tapOn: "+"
+- assertVisible: "Title *"
+- tapOn: "What were you rejected from?"
+- inputText: "E2E Test Rejection"
+- tapOn: "Tell the story of this rejection..."
+- inputText: "This was created by Maestro E2E test"
+- tapOn: "Add Rejection"
+- assertVisible:
+    text: "E2E Test Rejection"
+    timeout: 5000

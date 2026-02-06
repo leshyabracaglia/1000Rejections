@@ -1,21 +1,18 @@
 import { Stack } from 'expo-router';
-import { colors } from '../../constants/theme';
 
 export default function MainLayout() {
   return (
     <Stack>
       <Stack.Screen
         name="index"
-        options={{
-          headerShown: false,
-        }}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="add"
         options={{
           title: 'New Rejection',
           presentation: 'modal',
-          headerStyle: { backgroundColor: colors.background },
+          headerStyle: { backgroundColor: '#121212' },
           headerTintColor: '#FFFFFF',
         }}
       />
@@ -23,7 +20,7 @@ export default function MainLayout() {
         name="rejection/[id]"
         options={{
           title: 'Edit Rejection',
-          headerStyle: { backgroundColor: colors.background },
+          headerStyle: { backgroundColor: '#121212' },
           headerTintColor: '#FFFFFF',
         }}
       />

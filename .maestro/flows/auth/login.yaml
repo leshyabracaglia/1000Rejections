@@ -1,0 +1,16 @@
+appId: com.rejections.tracker
+---
+- launchApp
+- assertVisible: "1000 Rejections"
+- assertVisible: "Sign In"
+- tapOn:
+    id: "email"
+    optional: true
+- tapOn: "Email"
+- inputText: ${TEST_USER_EMAIL}
+- tapOn: "Password"
+- inputText: ${TEST_USER_PASSWORD}
+- tapOn: "Sign In"
+- assertVisible:
+    text: "rejections this year"
+    timeout: 10000

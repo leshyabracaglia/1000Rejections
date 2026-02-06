@@ -1,0 +1,14 @@
+appId: com.rejections.tracker
+---
+- launchApp
+- assertVisible:
+    text: "rejections this year"
+    timeout: 10000
+- tapOn: "Sign Out"
+- assertVisible: "Are you sure?"
+- tapOn:
+    text: "Sign Out"
+    index: 1
+- assertVisible:
+    text: "Sign In"
+    timeout: 5000

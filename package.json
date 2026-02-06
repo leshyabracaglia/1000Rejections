@@ -6,12 +6,18 @@
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:ci": "jest --ci --coverage",
+    "test:e2e": "maestro test .maestro/flows/",
+    "test:e2e:smoke": "maestro test .maestro/flows/smoke.yaml"
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-community/datetimepicker": "^8.4.4",
     "@supabase/supabase-js": "^2.93.3",
+    "babel-preset-expo": "^54.0.10",
     "base64-arraybuffer": "^1.0.2",
     "expo": "~54.0.33",
     "expo-constants": "^18.0.13",
@@ -28,8 +34,21 @@
     "react-native-url-polyfill": "^3.0.0"
   },
   "devDependencies": {
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^29.5.14",
     "@types/react": "~19.1.0",
+    "jest": "^29.7.0",
+    "jest-expo": "^54.0.17",
     "typescript": "~5.9.2"
   },
-  "private": true
+  "private": true,
+  "jest": {
+    "preset": "jest-expo",
+    "testMatch": [
+      "**/__tests__/**/*.test.[jt]s?(x)"
+    ],
+    "transformIgnorePatterns": [
+      "node_modules/(?!((jest-)?react-native|@react-native(-community)?)|expo(nern-)?(modules-)?|@expo(nern-)?/|@supabase/|react-native-url-polyfill|base64-arraybuffer)"
+    ]
+  }
 }

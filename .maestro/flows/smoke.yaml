@@ -1,0 +1,45 @@
+appId: com.rejections.tracker
+---
+# Smoke test: login -> verify home screen -> add rejection -> verify it appears -> clean up
+- launchApp
+- assertVisible:
+    text: "1000 Rejections"
+    timeout: 10000
+
+# Login
+- tapOn: "Email"
+- inputText: ${TEST_USER_EMAIL}
+- tapOn: "Password"
+- inputText: ${TEST_USER_PASSWORD}
+- tapOn: "Sign In"
+- assertVisible:
+    text: "rejections this year"
+    timeout: 10000
+
+# Add a rejection
+- tapOn: "+"
+- tapOn: "What were you rejected from?"
+- inputText: "Smoke Test Rejection"
+- tapOn: "Add Rejection"
+- assertVisible:
+    text: "Smoke Test Rejection"
+    timeout: 5000
+
+# Clean up - delete it
+- tapOn: "Smoke Test Rejection"
+- tapOn: "Delete Rejection"
+- assertVisible: "Are you sure?"
+- tapOn: "Delete"
+- assertNotVisible:
+    text: "Smoke Test Rejection"
+    timeout: 5000
+
+# Sign out
+- tapOn: "Sign Out"
+- assertVisible: "Are you sure?"
+- tapOn:
+    text: "Sign Out"
+    index: 1
+- assertVisible:
+    text: "Sign In"
+    timeout: 5000

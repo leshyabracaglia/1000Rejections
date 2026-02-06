@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image, Alert } from 'react-native';
-import { colors, fontSize, spacing } from '../constants/theme';
+import { View, Text, Pressable, Image, Alert } from 'react-native';
 import { Rejection } from '../types';
+
+const t = { surface: '#1E1E1E', primary: '#BB86FC', text: '#FFFFFF', textMuted: '#B3B3B3' };
 
 interface RejectionCardProps {
   rejection: Rejection;
@@ -10,7 +11,7 @@ interface RejectionCardProps {
 }
 
 export function RejectionCard({ rejection, onPress, onDelete }: RejectionCardProps) {
-  const formattedDate = new Date(rejection.date).toLocaleDateString('en-US', {
+  const formattedDate = new Date(rejection.date + 'T00:00:00').toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
     year: 'numeric',
@@ -29,63 +30,24 @@ export function RejectionCard({ rejection, onPress, onDelete }: RejectionCardPro
 
   return (
     <Pressable
-      style={({ pressed }) => [styles.container, pressed && styles.pressed]}
+      style={({ pressed }) => ({ flexDirection: 'row', backgroundColor: t.surface, borderRadius: 12, marginHorizontal: 16, marginVertical: 4, padding: 16, opacity: pressed ? 0.7 : 1 })}
       onPress={onPress}
       onLongPress={handleLongPress}
     >
       {rejection.image_url && (
-        <Image source={{ uri: rejection.image_url }} style={styles.thumbnail} />
+        <Image source={{ uri: rejection.image_url }} style={{ width: 64, height: 64, borderRadius: 8, marginRight: 16 }} />
       )}
-      <View style={styles.content}>
-        <Text style={styles.title} numberOfLines={1}>
+      <View style={{ flex: 1, justifyContent: 'center' }}>
+        <Text style={{ fontSize: 16, fontWeight: '600', color: t.text }} numberOfLines={1}>
           {rejection.title}
         </Text>
         {rejection.description && (
-          <Text style={styles.description} numberOfLines={2}>
+          <Text style={{ fontSize: 14, color: t.textMuted, marginTop: 4 }} numberOfLines={2}>
             {rejection.description}
           </Text>
         )}
-        <Text style={styles.date}>{formattedDate}</Text>
+        <Text style={{ fontSize: 12, color: t.primary, marginTop: 4 }}>{formattedDate}</Text>
       </View>
     </Pressable>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flexDirection: 'row',
-    backgroundColor: colors.surface,
-    borderRadius: 12,
-    marginHorizontal: spacing.md,
-    marginVertical: spacing.xs,
-    padding: spacing.md,
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  thumbnail: {
-    width: 60,
-    height: 60,
-    borderRadius: 8,
-    marginRight: spacing.md,
-  },
-  content: {
-    flex: 1,
-    justifyContent: 'center',
-  },
-  title: {
-    fontSize: fontSize.md,
-    fontWeight: '600',
-    color: colors.onSurface,
-  },
-  description: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-  },
-  date: {
-    fontSize: fontSize.xs,
-    color: colors.primary,
-    marginTop: spacing.xs,
-  },
-});

@@ -1,0 +1,18 @@
+appId: com.rejections.tracker
+---
+- launchApp
+- assertVisible: "1000 Rejections"
+- tapOn: "Sign Up"
+- assertVisible: "Join the Challenge"
+- tapOn: "Email"
+- inputText: ${TEST_SIGNUP_EMAIL}
+- tapOn:
+    text: "Password"
+    index: 0
+- inputText: ${TEST_USER_PASSWORD}
+- tapOn: "Confirm Password"
+- inputText: ${TEST_USER_PASSWORD}
+- tapOn: "Create Account"
+- assertVisible:
+    text: "Check your email"
+    timeout: 10000

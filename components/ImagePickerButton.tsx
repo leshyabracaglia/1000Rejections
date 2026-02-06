@@ -1,7 +1,8 @@
 import React from 'react';
-import { View, Text, StyleSheet, Pressable, Image, Alert } from 'react-native';
+import { View, Text, Pressable, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { colors, fontSize, spacing } from '../constants/theme';
+
+const t = { surface: '#1E1E1E', surfaceLight: '#2D2D2D', textMuted: '#B3B3B3', border: '#333333' };
 
 interface ImagePickerButtonProps {
   imageUri: string | null;
@@ -56,61 +57,21 @@ export function ImagePickerButton({ imageUri, onImageSelected }: ImagePickerButt
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Image (optional)</Text>
+    <View style={{ marginBottom: 16 }}>
+      <Text style={{ fontSize: 14, color: t.textMuted, marginBottom: 8 }}>Image (optional)</Text>
       <Pressable
-        style={({ pressed }) => [styles.button, pressed && styles.pressed]}
+        style={({ pressed }) => ({ borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderStyle: 'dashed', borderColor: t.border, opacity: pressed ? 0.7 : 1 })}
         onPress={showOptions}
       >
         {imageUri ? (
-          <Image source={{ uri: imageUri }} style={styles.preview} />
+          <Image source={{ uri: imageUri }} style={{ width: '100%', height: 208 }} />
         ) : (
-          <View style={styles.placeholder}>
-            <Text style={styles.placeholderIcon}>+</Text>
-            <Text style={styles.placeholderText}>Add Image</Text>
+          <View style={{ height: 128, justifyContent: 'center', alignItems: 'center', backgroundColor: t.surfaceLight }}>
+            <Text style={{ fontSize: 30, color: t.textMuted }}>+</Text>
+            <Text style={{ fontSize: 14, color: t.textMuted, marginTop: 4 }}>Add Image</Text>
           </View>
         )}
       </Pressable>
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    marginBottom: spacing.md,
-  },
-  label: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginBottom: spacing.sm,
-  },
-  button: {
-    borderRadius: 12,
-    overflow: 'hidden',
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderStyle: 'dashed',
-  },
-  pressed: {
-    opacity: 0.7,
-  },
-  preview: {
-    width: '100%',
-    height: 200,
-  },
-  placeholder: {
-    height: 120,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: colors.surfaceLight,
-  },
-  placeholderIcon: {
-    fontSize: 32,
-    color: colors.textSecondary,
-  },
-  placeholderText: {
-    fontSize: fontSize.sm,
-    color: colors.textSecondary,
-    marginTop: spacing.xs,
-  },
-});

@@ -1,9 +1,8 @@
 import React from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View } from 'react-native';
 import { router } from 'expo-router';
 import { supabase } from '../../lib/supabase';
 import { useAuth } from '../../lib/auth';
-import { colors } from '../../constants/theme';
 import { RejectionForm } from '../../components/RejectionForm';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
@@ -74,15 +73,8 @@ export default function AddRejectionScreen() {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={{ flex: 1, backgroundColor: '#121212' }}>
       <RejectionForm onSubmit={handleSubmit} submitLabel="Add Rejection" />
     </View>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-});
