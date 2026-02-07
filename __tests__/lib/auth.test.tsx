@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react-native';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react-native';
 import { Text } from 'react-native';
 
 jest.mock('../../lib/supabase', () => ({
@@ -12,6 +12,7 @@ jest.mock('../../lib/supabase', () => ({
       signUp: jest.fn().mockResolvedValue({ error: null }),
       signInWithPassword: jest.fn().mockResolvedValue({ error: null }),
       signOut: jest.fn().mockResolvedValue({ error: null }),
+      resetPasswordForEmail: jest.fn().mockResolvedValue({ error: null }),
     },
   },
 }));
@@ -27,6 +28,20 @@ function TestConsumer() {
     <>
       <Text testID="loading">{String(loading)}</Text>
       <Text testID="user">{user ? user.email : 'null'}</Text>
+    </>
+  );
+}
+
+function ResetPasswordConsumer() {
+  const { resetPassword } = useAuth();
+  const [result, setResult] = React.useState<string>('idle');
+  return (
+    <>
+      <Text testID="result">{result}</Text>
+      <Text testID="trigger" onPress={async () => {
+        const { error } = await resetPassword('test@example.com');
+        setResult(error ? error.message : 'sent');
+      }}>Reset</Text>
     </>
   );
 }
@@ -65,5 +80,25 @@ describe('useAuth', () => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
     expect(() => render(<TestConsumer />)).toThrow('useAuth must be used within an AuthProvider');
     (console.error as jest.Mock).mockRestore();
+  });
+});
+
+describe('resetPassword', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('calls supabase resetPasswordForEmail with the email', async () => {
+    render(<AuthProvider><ResetPasswordConsumer /></AuthProvider>);
+    await waitFor(() => expect(screen.getByTestId('result').props.children).toBe('idle'));
+    fireEvent.press(screen.getByTestId('trigger'));
+    await waitFor(() => expect(screen.getByTestId('result').props.children).toBe('sent'));
+    expect(mockAuth.resetPasswordForEmail).toHaveBeenCalledWith('test@example.com');
+  });
+
+  it('returns error when supabase call fails', async () => {
+    (mockAuth.resetPasswordForEmail as jest.Mock).mockResolvedValue({ error: new Error('Rate limit') });
+    render(<AuthProvider><ResetPasswordConsumer /></AuthProvider>);
+    await waitFor(() => expect(screen.getByTestId('result').props.children).toBe('idle'));
+    fireEvent.press(screen.getByTestId('trigger'));
+    await waitFor(() => expect(screen.getByTestId('result').props.children).toBe('Rate limit'));
   });
 });
