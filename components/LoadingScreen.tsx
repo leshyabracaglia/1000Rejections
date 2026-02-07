@@ -1,7 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { View, Text, Animated, Easing } from 'react-native';
-
-const t = { bg: '#121212', primary: '#BB86FC', text: '#FFFFFF', textMuted: '#B3B3B3' };
+import { colors, fonts } from '../constants/theme';
 
 const MOTIVATIONAL_LINES = [
   'Every rejection is progress.',
@@ -25,14 +24,14 @@ export function LoadingScreen() {
   }, []);
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
+    <View style={{ flex: 1, backgroundColor: colors.background, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 32 }}>
       <Animated.Text style={{ fontSize: 52, opacity: pulseAnim, marginBottom: 12 }}>
         🏆
       </Animated.Text>
-      <Text style={{ fontSize: 28, fontWeight: 'bold', color: t.primary, letterSpacing: 0.5 }}>
+      <Text style={{ fontSize: 28, fontFamily: fonts.accent, color: colors.primary, letterSpacing: 1 }}>
         1000 Rejections
       </Text>
-      <Text style={{ fontSize: 15, color: t.textMuted, marginTop: 12, fontStyle: 'italic', textAlign: 'center' }}>
+      <Text style={{ fontSize: 15, fontFamily: fonts.italic, color: colors.textMuted, marginTop: 12, textAlign: 'center' }}>
         {line}
       </Text>
     </View>

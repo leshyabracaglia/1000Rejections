@@ -9,9 +9,12 @@ export const colors = {
   onBackground: '#FFFFFF',
   onSurface: '#FFFFFF',
   onPrimary: '#000000',
+  text: '#FFFFFF',
+  textMuted: '#B3B3B3',
   textSecondary: '#B3B3B3',
   border: '#333333',
   success: '#4CAF50',
+  celebration: '#2D1F3D',
 };
 
 export const spacing = {
@@ -30,4 +33,12 @@ export const fontSize = {
   xl: 24,
   xxl: 32,
   hero: 48,
+};
+
+export const fonts = {
+  regular: 'Lato_400Regular',
+  bold: 'Lato_700Bold',
+  italic: 'Lato_400Regular_Italic',
+  accent: 'Inconsolata_700Bold',
+  accentRegular: 'Inconsolata_400Regular',
 };

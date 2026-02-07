@@ -7,8 +7,7 @@ import { RejectionForm } from '../../../components/RejectionForm';
 import { Rejection } from '../../../types';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
-
-const t = { bg: '#121212', primary: '#BB86FC', error: '#CF6679' };
+import { colors, fonts } from '../../../constants/theme';
 
 export default function EditRejectionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
@@ -121,14 +120,17 @@ export default function EditRejectionScreen() {
     },
   ]);
 
-  if (loading) return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: t.bg }}><ActivityIndicator size="large" color={t.primary} /></View>;
+  if (loading) return <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}><ActivityIndicator size="large" color={colors.primary} /></View>;
   if (!rejection) return null;
 
   return (
-    <View style={{ flex: 1, backgroundColor: t.bg }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <RejectionForm initialValues={{ title: rejection.title, description: rejection.description || '', date: new Date(rejection.date), imageUri: rejection.image_url }} onSubmit={handleSubmit} submitLabel="Save Changes" />
-      <Pressable style={{ marginHorizontal: 16, marginBottom: 32, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: t.error, alignItems: 'center' }} onPress={handleDelete}>
-        <Text style={{ color: t.error, fontSize: 16, fontWeight: '600' }}>Delete Rejection</Text>
+      <Pressable
+        style={({ pressed }) => ({ marginHorizontal: 16, marginBottom: 32, padding: 16, borderRadius: 12, borderWidth: 1, borderColor: colors.error, alignItems: 'center', opacity: pressed ? 0.7 : 1 })}
+        onPress={handleDelete}
+      >
+        <Text style={{ color: colors.error, fontSize: 16, fontFamily: fonts.bold }}>Delete Rejection</Text>
       </Pressable>
     </View>
   );

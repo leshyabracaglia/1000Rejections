@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, Pressable, ScrollView, Platform, ActivityIndicator } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
 import { ImagePickerButton } from './ImagePickerButton';
-
-const t = { surface: '#1E1E1E', primary: '#BB86FC', text: '#FFFFFF', textMuted: '#B3B3B3', border: '#333333', error: '#CF6679', onPrimary: '#000000' };
+import { colors, fonts } from '../constants/theme';
 
 interface RejectionFormProps {
   initialValues?: {
@@ -55,40 +54,49 @@ export function RejectionForm({ initialValues, onSubmit, submitLabel }: Rejectio
     year: 'numeric',
   });
 
+  const inputStyle = {
+    backgroundColor: colors.surface,
+    borderRadius: 12,
+    padding: 16,
+    fontSize: 16,
+    color: colors.text,
+    fontFamily: fonts.regular,
+  };
+
   return (
     <ScrollView style={{ flex: 1, padding: 16 }} keyboardShouldPersistTaps="handled">
-      <View style={{ marginBottom: 16 }}>
-        <Text style={{ fontSize: 14, color: t.textMuted, marginBottom: 8 }}>Title *</Text>
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.textMuted, marginBottom: 8 }}>Title *</Text>
         <TextInput
-          style={{ backgroundColor: t.surface, borderRadius: 12, padding: 16, fontSize: 16, color: t.text, borderWidth: 1, borderColor: t.border }}
+          style={inputStyle}
           value={title}
           onChangeText={setTitle}
           placeholder="What were you rejected from?"
-          placeholderTextColor={t.textMuted}
+          placeholderTextColor={colors.textMuted}
         />
       </View>
 
-      <View style={{ marginBottom: 16 }}>
-        <Text style={{ fontSize: 14, color: t.textMuted, marginBottom: 8 }}>Description</Text>
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.textMuted, marginBottom: 8 }}>Description</Text>
         <TextInput
-          style={{ backgroundColor: t.surface, borderRadius: 12, padding: 16, fontSize: 16, color: t.text, borderWidth: 1, borderColor: t.border, minHeight: 100 }}
+          style={{ ...inputStyle, minHeight: 100 }}
           value={description}
           onChangeText={setDescription}
           placeholder="Tell the story of this rejection..."
-          placeholderTextColor={t.textMuted}
+          placeholderTextColor={colors.textMuted}
           multiline
           numberOfLines={4}
           textAlignVertical="top"
         />
       </View>
 
-      <View style={{ marginBottom: 16 }}>
-        <Text style={{ fontSize: 14, color: t.textMuted, marginBottom: 8 }}>Date</Text>
+      <View style={{ marginBottom: 20 }}>
+        <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.textMuted, marginBottom: 8 }}>Date</Text>
         <Pressable
-          style={{ backgroundColor: t.surface, borderRadius: 12, padding: 16, borderWidth: 1, borderColor: t.border }}
+          style={{ backgroundColor: colors.surface, borderRadius: 12, padding: 16 }}
           onPress={() => setShowDatePicker(true)}
         >
-          <Text style={{ fontSize: 16, color: t.text }}>{formattedDate}</Text>
+          <Text style={{ fontSize: 16, fontFamily: fonts.regular, color: colors.text }}>{formattedDate}</Text>
         </Pressable>
         {showDatePicker && (
           <DateTimePicker
@@ -109,17 +117,17 @@ export function RejectionForm({ initialValues, onSubmit, submitLabel }: Rejectio
 
       <ImagePickerButton imageUri={imageUri} onImageSelected={setImageUri} />
 
-      {error && <Text style={{ color: t.error, fontSize: 14, marginBottom: 16 }}>{error}</Text>}
+      {error && <Text style={{ fontFamily: fonts.regular, color: colors.error, fontSize: 14, marginBottom: 16 }}>{error}</Text>}
 
       <Pressable
-        style={({ pressed }) => ({ backgroundColor: t.primary, borderRadius: 12, padding: 16, alignItems: 'center', marginTop: 16, marginBottom: 32, opacity: loading ? 0.6 : pressed ? 0.8 : 1 })}
+        style={({ pressed }) => ({ backgroundColor: colors.primary, borderRadius: 14, padding: 18, alignItems: 'center', marginTop: 16, marginBottom: 32, opacity: loading ? 0.6 : pressed ? 0.8 : 1 })}
         onPress={handleSubmit}
         disabled={loading}
       >
         {loading ? (
-          <ActivityIndicator color={t.onPrimary} />
+          <ActivityIndicator color={colors.onPrimary} />
         ) : (
-          <Text style={{ color: t.onPrimary, fontSize: 16, fontWeight: '600' }}>{submitLabel}</Text>
+          <Text style={{ color: colors.onPrimary, fontSize: 16, fontFamily: fonts.bold }}>{submitLabel}</Text>
         )}
       </Pressable>
     </ScrollView>

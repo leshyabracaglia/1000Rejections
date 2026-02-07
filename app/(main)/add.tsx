@@ -6,6 +6,7 @@ import { useAuth } from '../../lib/auth';
 import { RejectionForm } from '../../components/RejectionForm';
 import * as FileSystem from 'expo-file-system/legacy';
 import { decode } from 'base64-arraybuffer';
+import { colors } from '../../constants/theme';
 
 export default function AddRejectionScreen() {
   const { user } = useAuth();
@@ -73,7 +74,7 @@ export default function AddRejectionScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: '#121212' }}>
+    <View style={{ flex: 1, backgroundColor: colors.background }}>
       <RejectionForm onSubmit={handleSubmit} submitLabel="Add Rejection" />
     </View>
   );

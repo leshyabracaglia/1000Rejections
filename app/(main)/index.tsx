@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { View, Text, FlatList, Pressable, RefreshControl, Alert } from 'react-native';
 import { useFocusEffect, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -8,8 +8,9 @@ import { Rejection } from '../../types';
 import { Counter } from '../../components/Counter';
 import { RejectionCard } from '../../components/RejectionCard';
 import { LoadingScreen } from '../../components/LoadingScreen';
-
-const t = { bg: '#121212', primary: '#BB86FC', text: '#FFFFFF', textMuted: '#B3B3B3', onPrimary: '#000000' };
+import { RejectionChart } from '../../components/RejectionChart';
+import { aggregateByMonth } from '../../lib/chartUtils';
+import { colors, fonts } from '../../constants/theme';
 
 export default function HomeScreen() {
   const { user, signOut } = useAuth();
@@ -17,6 +18,7 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [percentile, setPercentile] = useState<number | null>(null);
+  const chartData = useMemo(() => aggregateByMonth(rejections, 6), [rejections]);
 
   const fetchRejections = async () => {
     if (!user) return;
@@ -99,11 +101,14 @@ export default function HomeScreen() {
   if (loading) return <LoadingScreen />;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: t.bg }} edges={['top']}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, paddingVertical: 8 }}>
-        <Text style={{ fontSize: 20, fontWeight: 'bold', color: t.primary }}>1000 Rejections</Text>
-        <Pressable onPress={handleSignOut} style={{ padding: 8 }}>
-          <Text style={{ color: t.textMuted, fontSize: 14 }}>Sign Out</Text>
+    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12 }}>
+        <Text style={{ fontSize: 24, fontFamily: fonts.accent, color: colors.primary }}>1000 Rejections</Text>
+        <Pressable
+          onPress={handleSignOut}
+          style={({ pressed }) => ({ paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, backgroundColor: pressed ? colors.surfaceLight : 'transparent' })}
+        >
+          <Text style={{ fontFamily: fonts.regular, color: colors.textMuted, fontSize: 14 }}>Sign Out</Text>
         </Pressable>
       </View>
 
@@ -120,12 +125,13 @@ export default function HomeScreen() {
         ListHeaderComponent={
           <>
             <Counter count={rejections.length} />
+            <RejectionChart data={chartData} />
             {percentile !== null && percentile >= 50 && (
-              <View style={{ marginHorizontal: 16, marginBottom: 16, padding: 16, backgroundColor: '#2D1F3D', borderRadius: 12 }}>
-                <Text style={{ fontSize: 16, color: t.primary, fontWeight: '600', textAlign: 'center' }}>
+              <View style={{ marginHorizontal: 16, marginBottom: 16, padding: 16, backgroundColor: colors.celebration, borderRadius: 12 }}>
+                <Text style={{ fontSize: 16, fontFamily: fonts.bold, color: colors.primary, textAlign: 'center' }}>
                   You're in the top {100 - percentile}% of rejection loggers!
                 </Text>
-                <Text style={{ fontSize: 14, color: t.text, textAlign: 'center', marginTop: 4 }}>
+                <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.text, textAlign: 'center', marginTop: 4 }}>
                   You are fearless! 🏆
                 </Text>
               </View>
@@ -133,20 +139,36 @@ export default function HomeScreen() {
           </>
         }
         ListEmptyComponent={
-          <View style={{ padding: 32, alignItems: 'center' }}>
-            <Text style={{ fontSize: 18, fontWeight: '600', color: t.text, marginBottom: 8 }}>No rejections yet</Text>
-            <Text style={{ fontSize: 16, color: t.textMuted, textAlign: 'center' }}>Start your journey! Add your first rejection.</Text>
+          <View style={{ padding: 48, alignItems: 'center' }}>
+            <Text style={{ fontSize: 18, fontFamily: fonts.bold, color: colors.text, marginBottom: 8 }}>No rejections yet</Text>
+            <Text style={{ fontSize: 16, fontFamily: fonts.regular, color: colors.textMuted, textAlign: 'center', lineHeight: 24 }}>Start your journey! Tap + to add your first rejection.</Text>
           </View>
         }
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchRejections(); }} tintColor={t.primary} />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchRejections(); }} tintColor={colors.primary} />}
         contentContainerStyle={{ paddingBottom: 100 }}
       />
 
       <Pressable
-        style={{ position: 'absolute', right: 24, bottom: 32, width: 64, height: 64, borderRadius: 32, backgroundColor: t.primary, justifyContent: 'center', alignItems: 'center', shadowColor: '#000', shadowOffset: { width: 0, height: 4 }, shadowOpacity: 0.3, shadowRadius: 4, elevation: 8 }}
+        style={({ pressed }) => ({
+          position: 'absolute',
+          right: 24,
+          bottom: 32,
+          width: 64,
+          height: 64,
+          borderRadius: 32,
+          backgroundColor: colors.primary,
+          justifyContent: 'center',
+          alignItems: 'center',
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.4,
+          shadowRadius: 12,
+          elevation: 8,
+          opacity: pressed ? 0.8 : 1,
+        })}
         onPress={() => router.push('/(main)/add')}
       >
-        <Text style={{ fontSize: 32, color: t.onPrimary, fontWeight: '300', marginTop: -2 }}>+</Text>
+        <Text style={{ fontSize: 32, color: colors.onPrimary, fontWeight: '300', marginTop: -2 }}>+</Text>
       </Pressable>
     </SafeAreaView>
   );

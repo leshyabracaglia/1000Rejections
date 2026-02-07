@@ -1,8 +1,7 @@
 import React from 'react';
 import { View, Text, Pressable, Image, Alert } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-
-const t = { surface: '#1E1E1E', surfaceLight: '#2D2D2D', textMuted: '#B3B3B3', border: '#333333' };
+import { colors, fonts } from '../constants/theme';
 
 interface ImagePickerButtonProps {
   imageUri: string | null;
@@ -58,17 +57,17 @@ export function ImagePickerButton({ imageUri, onImageSelected }: ImagePickerButt
 
   return (
     <View style={{ marginBottom: 16 }}>
-      <Text style={{ fontSize: 14, color: t.textMuted, marginBottom: 8 }}>Image (optional)</Text>
+      <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.textMuted, marginBottom: 8 }}>Image (optional)</Text>
       <Pressable
-        style={({ pressed }) => ({ borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderStyle: 'dashed', borderColor: t.border, opacity: pressed ? 0.7 : 1 })}
+        style={({ pressed }) => ({ borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border, opacity: pressed ? 0.7 : 1 })}
         onPress={showOptions}
       >
         {imageUri ? (
           <Image source={{ uri: imageUri }} style={{ width: '100%', height: 208 }} />
         ) : (
-          <View style={{ height: 128, justifyContent: 'center', alignItems: 'center', backgroundColor: t.surfaceLight }}>
-            <Text style={{ fontSize: 30, color: t.textMuted }}>+</Text>
-            <Text style={{ fontSize: 14, color: t.textMuted, marginTop: 4 }}>Add Image</Text>
+          <View style={{ height: 128, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surfaceLight }}>
+            <Text style={{ fontSize: 30, color: colors.textMuted }}>+</Text>
+            <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.textMuted, marginTop: 4 }}>Add Image</Text>
           </View>
         )}
       </Pressable>
