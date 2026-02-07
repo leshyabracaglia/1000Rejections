@@ -58,7 +58,13 @@ export default function LoginScreen() {
           {loading ? <ActivityIndicator color={t.onPrimary} /> : <Text style={{ color: t.onPrimary, fontSize: 16, fontWeight: '600' }}>Sign In</Text>}
         </Pressable>
 
-        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 24 }}>
+        <Link href="/(auth)/forgot-password" asChild>
+          <Pressable style={{ alignSelf: 'center', marginTop: 16 }}>
+            <Text style={{ color: t.textMuted, fontSize: 14 }}>Forgot password?</Text>
+          </Pressable>
+        </Link>
+
+        <View style={{ flexDirection: 'row', justifyContent: 'center', marginTop: 16 }}>
           <Text style={{ color: t.textMuted, fontSize: 14 }}>Don't have an account? </Text>
           <Link href="/(auth)/signup" asChild>
             <Pressable><Text style={{ color: t.primary, fontSize: 14, fontWeight: '600' }}>Sign Up</Text></Pressable>

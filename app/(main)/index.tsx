@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from 'react';
-import { View, Text, FlatList, Pressable, RefreshControl, ActivityIndicator, Alert } from 'react-native';
+import { View, Text, FlatList, Pressable, RefreshControl, Alert } from 'react-native';
 import { useFocusEffect, router } from 'expo-router';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { supabase } from '../../lib/supabase';
@@ -7,6 +7,7 @@ import { useAuth } from '../../lib/auth';
 import { Rejection } from '../../types';
 import { Counter } from '../../components/Counter';
 import { RejectionCard } from '../../components/RejectionCard';
+import { LoadingScreen } from '../../components/LoadingScreen';
 
 const t = { bg: '#121212', primary: '#BB86FC', text: '#FFFFFF', textMuted: '#B3B3B3', onPrimary: '#000000' };
 
@@ -15,6 +16,7 @@ export default function HomeScreen() {
   const [rejections, setRejections] = useState<Rejection[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [percentile, setPercentile] = useState<number | null>(null);
 
   const fetchRejections = async () => {
     if (!user) return;
@@ -29,9 +31,41 @@ export default function HomeScreen() {
       console.error('Error fetching rejections:', error);
     } else {
       setRejections(data || []);
+      fetchPercentile(data?.length || 0);
     }
     setLoading(false);
     setRefreshing(false);
+  };
+
+  const fetchPercentile = async (myCount: number) => {
+    if (myCount === 0) {
+      setPercentile(null);
+      return;
+    }
+
+    // Get count of rejections per user
+    const { data, error } = await supabase
+      .from('rejections')
+      .select('user_id');
+
+    if (error || !data) {
+      setPercentile(null);
+      return;
+    }
+
+    // Count rejections per user
+    const userCounts: Record<string, number> = {};
+    data.forEach((r) => {
+      userCounts[r.user_id] = (userCounts[r.user_id] || 0) + 1;
+    });
+
+    const counts = Object.values(userCounts);
+    const totalUsers = counts.length;
+    const usersWithFewer = counts.filter((c) => c < myCount).length;
+
+    // Calculate percentile (what % of users you beat)
+    const pct = Math.round((usersWithFewer / totalUsers) * 100);
+    setPercentile(pct);
   };
 
   useFocusEffect(
@@ -62,11 +96,7 @@ export default function HomeScreen() {
     ]);
   };
 
-  if (loading) return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: t.bg, justifyContent: 'center', alignItems: 'center' }}>
-      <ActivityIndicator size="large" color={t.primary} />
-    </SafeAreaView>
-  );
+  if (loading) return <LoadingScreen />;
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: t.bg }} edges={['top']}>
@@ -87,7 +117,21 @@ export default function HomeScreen() {
             onDelete={() => handleDelete(item.id)}
           />
         )}
-        ListHeaderComponent={<Counter count={rejections.length} />}
+        ListHeaderComponent={
+          <>
+            <Counter count={rejections.length} />
+            {percentile !== null && percentile >= 50 && (
+              <View style={{ marginHorizontal: 16, marginBottom: 16, padding: 16, backgroundColor: '#2D1F3D', borderRadius: 12 }}>
+                <Text style={{ fontSize: 16, color: t.primary, fontWeight: '600', textAlign: 'center' }}>
+                  You're in the top {100 - percentile}% of rejection loggers!
+                </Text>
+                <Text style={{ fontSize: 14, color: t.text, textAlign: 'center', marginTop: 4 }}>
+                  You are fearless! 🏆
+                </Text>
+              </View>
+            )}
+          </>
+        }
         ListEmptyComponent={
           <View style={{ padding: 32, alignItems: 'center' }}>
             <Text style={{ fontSize: 18, fontWeight: '600', color: t.text, marginBottom: 8 }}>No rejections yet</Text>

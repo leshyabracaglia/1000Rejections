@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@react-native-async-storage/async-storage": "^2.2.0",
-    "@react-native-community/datetimepicker": "^8.4.4",
+    "@react-native-community/datetimepicker": "8.4.4",
     "@supabase/supabase-js": "^2.93.3",
     "babel-preset-expo": "^54.0.10",
     "base64-arraybuffer": "^1.0.2",
@@ -30,7 +30,7 @@
     "react": "19.1.0",
     "react-native": "0.81.5",
     "react-native-safe-area-context": "^5.6.2",
-    "react-native-screens": "^4.16.0",
+    "react-native-screens": "~4.16.0",
     "react-native-url-polyfill": "^3.0.0"
   },
   "devDependencies": {
