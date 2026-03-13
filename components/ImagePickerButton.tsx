@@ -1,23 +1,30 @@
-import React from 'react';
-import { View, Text, Pressable, Image, Alert } from 'react-native';
-import * as ImagePicker from 'expo-image-picker';
-import { colors, fonts } from '../constants/theme';
+import React from "react";
+import { View, Text, Pressable, Image, Alert } from "react-native";
+import * as ImagePicker from "expo-image-picker";
+import { colors, fonts } from "../constants/theme";
 
 interface ImagePickerButtonProps {
   imageUri: string | null;
   onImageSelected: (uri: string | null) => void;
 }
 
-export function ImagePickerButton({ imageUri, onImageSelected }: ImagePickerButtonProps) {
+export function ImagePickerButton({
+  imageUri,
+  onImageSelected,
+}: ImagePickerButtonProps) {
   const pickImage = async () => {
-    const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please grant photo library access to add images.');
+    const { status } =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission needed",
+        "Please grant photo library access to add images.",
+      );
       return;
     }
 
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ['images'],
+      mediaTypes: ["images"],
       allowsEditing: true,
       aspect: [4, 3],
       quality: 0.8,
@@ -30,8 +37,11 @@ export function ImagePickerButton({ imageUri, onImageSelected }: ImagePickerButt
 
   const takePhoto = async () => {
     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert('Permission needed', 'Please grant camera access to take photos.');
+    if (status !== "granted") {
+      Alert.alert(
+        "Permission needed",
+        "Please grant camera access to take photos.",
+      );
       return;
     }
 
@@ -47,27 +57,79 @@ export function ImagePickerButton({ imageUri, onImageSelected }: ImagePickerButt
   };
 
   const showOptions = () => {
-    Alert.alert('Add Image', 'Choose an option', [
-      { text: 'Take Photo', onPress: takePhoto },
-      { text: 'Choose from Library', onPress: pickImage },
-      ...(imageUri ? [{ text: 'Remove Image', style: 'destructive' as const, onPress: () => onImageSelected(null) }] : []),
-      { text: 'Cancel', style: 'cancel' as const },
+    Alert.alert("Add Image", "Choose an option", [
+      { text: "Take Photo", onPress: takePhoto },
+      { text: "Choose from Library", onPress: pickImage },
+      ...(imageUri
+        ? [
+            {
+              text: "Remove Image",
+              style: "destructive" as const,
+              onPress: () => onImageSelected(null),
+            },
+          ]
+        : []),
+      { text: "Cancel", style: "cancel" as const },
     ]);
   };
 
   return (
     <View style={{ marginBottom: 16 }}>
-      <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.textMuted, marginBottom: 8 }}>Image (optional)</Text>
+      <Text
+        style={{
+          fontSize: 12,
+          fontFamily: fonts.accent,
+          color: colors.textMuted,
+          marginBottom: 8,
+          letterSpacing: 1,
+          textTransform: "uppercase",
+        }}
+      >
+        Image (optional)
+      </Text>
       <Pressable
-        style={({ pressed }) => ({ borderRadius: 12, overflow: 'hidden', borderWidth: 1, borderStyle: 'dashed', borderColor: colors.border, opacity: pressed ? 0.7 : 1 })}
+        style={({ pressed }) => ({
+          borderRadius: 12,
+          overflow: "hidden",
+          borderWidth: 1,
+          borderStyle: imageUri ? ("solid" as const) : ("dashed" as const),
+          borderColor: imageUri ? colors.borderSubtle : colors.border,
+          opacity: pressed ? 0.85 : 1,
+        })}
         onPress={showOptions}
       >
         {imageUri ? (
-          <Image source={{ uri: imageUri }} style={{ width: '100%', height: 208 }} />
+          <Image
+            source={{ uri: imageUri }}
+            style={{ width: "100%", height: 208 }}
+          />
         ) : (
-          <View style={{ height: 128, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.surfaceLight }}>
-            <Text style={{ fontSize: 30, color: colors.textMuted }}>+</Text>
-            <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.textMuted, marginTop: 4 }}>Add Image</Text>
+          <View
+            style={{
+              height: 120,
+              justifyContent: "center",
+              alignItems: "center",
+              backgroundColor: colors.surfaceElevated,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 24,
+                color: `${colors.textMuted}66`,
+              }}
+            >
+              +
+            </Text>
+            <Text
+              style={{
+                fontSize: 13,
+                fontFamily: fonts.regular,
+                color: `${colors.textMuted}88`,
+                marginTop: 4,
+              }}
+            >
+              Add Image
+            </Text>
           </View>
         )}
       </Pressable>

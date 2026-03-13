@@ -47,44 +47,41 @@ export function RejectionCard({
   };
 
   return (
-    <View
-      style={{
+    <Pressable
+      style={({ pressed }) => ({
         marginHorizontal: 16,
-        marginVertical: 6,
-        borderRadius: 12,
-        backgroundColor: "#0D0D0D",
+        marginVertical: 5,
+        borderRadius: 14,
+        backgroundColor: colors.surfaceElevated,
+        borderWidth: 1,
+        borderColor: pressed ? colors.border : colors.borderSubtle,
         shadowColor: "#000",
         shadowOffset: { width: 0, height: 4 },
-        shadowOpacity: 0.35,
-        shadowRadius: 6,
-        elevation: 6,
-      }}
+        shadowOpacity: 0.15,
+        shadowRadius: 12,
+        elevation: 4,
+        opacity: pressed ? 0.92 : 1,
+      })}
+      onPress={onPress}
+      onLongPress={handleLongPress}
     >
-      <Pressable
-        style={({ pressed }) => ({
+      <View
+        style={{
           flexDirection: "row",
-          backgroundColor: "#242424",
-          borderRadius: 12,
           padding: 16,
-          opacity: pressed ? 0.7 : 1,
           borderLeftWidth: 3,
           borderLeftColor: borderColor,
-          borderTopWidth: 1,
-          borderTopColor: "#333333",
-          borderBottomWidth: 2,
-          borderBottomColor: "#0A0A0A",
-        })}
-        onPress={onPress}
-        onLongPress={handleLongPress}
+          borderRadius: 14,
+        }}
       >
         {rejection.image_url && (
           <Image
             source={{ uri: rejection.image_url }}
             style={{
-              width: 64,
-              height: 64,
-              borderRadius: 8,
-              marginRight: 16,
+              width: 56,
+              height: 56,
+              borderRadius: 10,
+              marginRight: 14,
             }}
           />
         )}
@@ -98,10 +95,11 @@ export function RejectionCard({
           >
             <Text
               style={{
-                fontSize: 16,
+                fontSize: 15,
                 fontFamily: fonts.bold,
                 color: colors.text,
                 flex: 1,
+                letterSpacing: 0.1,
               }}
               numberOfLines={1}
             >
@@ -109,11 +107,13 @@ export function RejectionCard({
             </Text>
             <View
               style={{
-                paddingHorizontal: 8,
-                paddingVertical: 2,
-                borderRadius: 8,
-                backgroundColor: `${borderColor}20`,
-                marginLeft: 8,
+                paddingHorizontal: 10,
+                paddingVertical: 3,
+                borderRadius: 6,
+                backgroundColor: `${borderColor}15`,
+                borderWidth: 1,
+                borderColor: `${borderColor}25`,
+                marginLeft: 10,
               }}
             >
               <Text
@@ -121,6 +121,7 @@ export function RejectionCard({
                   fontSize: 11,
                   fontFamily: fonts.bold,
                   color: borderColor,
+                  letterSpacing: 0.3,
                 }}
               >
                 {statusLabels[status]}
@@ -134,6 +135,7 @@ export function RejectionCard({
                 fontFamily: fonts.regular,
                 color: colors.textMuted,
                 marginTop: 4,
+                lineHeight: 20,
               }}
               numberOfLines={2}
             >
@@ -144,8 +146,9 @@ export function RejectionCard({
             style={{
               fontSize: 12,
               fontFamily: fonts.accentRegular,
-              color: colors.textMuted,
+              color: `${colors.textMuted}99`,
               marginTop: 6,
+              letterSpacing: 0.5,
             }}
           >
             {formattedDate}
@@ -155,13 +158,13 @@ export function RejectionCard({
               <Pressable
                 style={({ pressed }) => ({
                   paddingVertical: 6,
-                  paddingHorizontal: 12,
+                  paddingHorizontal: 14,
                   borderRadius: 8,
                   backgroundColor: pressed
-                    ? `${colors.primary}30`
-                    : `${colors.primary}15`,
+                    ? `${colors.primary}25`
+                    : `${colors.primary}10`,
                   borderWidth: 1,
-                  borderColor: `${colors.primary}50`,
+                  borderColor: `${colors.primary}30`,
                 })}
                 onPress={(e) => {
                   e.stopPropagation?.();
@@ -173,21 +176,22 @@ export function RejectionCard({
                     fontSize: 12,
                     fontFamily: fonts.bold,
                     color: colors.primary,
+                    letterSpacing: 0.2,
                   }}
                 >
-                  ✗ Rejected
+                  Rejected
                 </Text>
               </Pressable>
               <Pressable
                 style={({ pressed }) => ({
                   paddingVertical: 6,
-                  paddingHorizontal: 12,
+                  paddingHorizontal: 14,
                   borderRadius: 8,
                   backgroundColor: pressed
-                    ? `${colors.success}30`
-                    : `${colors.success}15`,
+                    ? `${colors.success}25`
+                    : `${colors.success}10`,
                   borderWidth: 1,
-                  borderColor: `${colors.success}50`,
+                  borderColor: `${colors.success}30`,
                 })}
                 onPress={(e) => {
                   e.stopPropagation?.();
@@ -199,15 +203,16 @@ export function RejectionCard({
                     fontSize: 12,
                     fontFamily: fonts.bold,
                     color: colors.success,
+                    letterSpacing: 0.2,
                   }}
                 >
-                  ✓ Accepted
+                  Accepted
                 </Text>
               </Pressable>
             </View>
           )}
         </View>
-      </Pressable>
-    </View>
+      </View>
+    </Pressable>
   );
 }

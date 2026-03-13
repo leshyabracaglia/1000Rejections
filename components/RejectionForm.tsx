@@ -76,12 +76,14 @@ export function RejectionForm({
   });
 
   const inputStyle = {
-    backgroundColor: colors.surface,
+    backgroundColor: colors.surfaceElevated,
     borderRadius: 12,
     padding: 16,
     fontSize: 16,
     color: colors.text,
     fontFamily: fonts.regular,
+    borderWidth: 1,
+    borderColor: colors.borderSubtle,
   };
 
   return (
@@ -92,10 +94,12 @@ export function RejectionForm({
       <View style={{ marginBottom: 20 }}>
         <Text
           style={{
-            fontSize: 14,
-            fontFamily: fonts.regular,
+            fontSize: 12,
+            fontFamily: fonts.accent,
             color: colors.textMuted,
             marginBottom: 8,
+            letterSpacing: 1,
+            textTransform: "uppercase",
           }}
         >
           Title *
@@ -105,17 +109,19 @@ export function RejectionForm({
           value={title}
           onChangeText={setTitle}
           placeholder="What did you apply for?"
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={`${colors.textMuted}77`}
         />
       </View>
 
       <View style={{ marginBottom: 20 }}>
         <Text
           style={{
-            fontSize: 14,
-            fontFamily: fonts.regular,
+            fontSize: 12,
+            fontFamily: fonts.accent,
             color: colors.textMuted,
             marginBottom: 8,
+            letterSpacing: 1,
+            textTransform: "uppercase",
           }}
         >
           Description
@@ -125,7 +131,7 @@ export function RejectionForm({
           value={description}
           onChangeText={setDescription}
           placeholder="Add any notes or details..."
-          placeholderTextColor={colors.textMuted}
+          placeholderTextColor={`${colors.textMuted}77`}
           multiline
           numberOfLines={4}
           textAlignVertical="top"
@@ -135,20 +141,24 @@ export function RejectionForm({
       <View style={{ marginBottom: 20 }}>
         <Text
           style={{
-            fontSize: 14,
-            fontFamily: fonts.regular,
+            fontSize: 12,
+            fontFamily: fonts.accent,
             color: colors.textMuted,
             marginBottom: 8,
+            letterSpacing: 1,
+            textTransform: "uppercase",
           }}
         >
           Date
         </Text>
         <Pressable
-          style={{
-            backgroundColor: colors.surface,
+          style={({ pressed }) => ({
+            backgroundColor: colors.surfaceElevated,
             borderRadius: 12,
             padding: 16,
-          }}
+            borderWidth: 1,
+            borderColor: pressed ? colors.border : colors.borderSubtle,
+          })}
           onPress={() => setShowDatePicker(true)}
         >
           <Text
@@ -201,7 +211,12 @@ export function RejectionForm({
           alignItems: "center",
           marginTop: 16,
           marginBottom: 32,
-          opacity: loading ? 0.6 : pressed ? 0.8 : 1,
+          opacity: loading ? 0.6 : pressed ? 0.9 : 1,
+          shadowColor: colors.primary,
+          shadowOffset: { width: 0, height: 4 },
+          shadowOpacity: 0.3,
+          shadowRadius: 12,
+          elevation: 6,
         })}
         onPress={handleSubmit}
         disabled={loading}
@@ -214,6 +229,7 @@ export function RejectionForm({
               color: colors.onPrimary,
               fontSize: 16,
               fontFamily: fonts.bold,
+              letterSpacing: 0.3,
             }}
           >
             {submitLabel}

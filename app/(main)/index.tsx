@@ -1,12 +1,5 @@
 import React, { useCallback, useMemo, useState } from "react";
-import {
-  View,
-  Text,
-  FlatList,
-  Pressable,
-  RefreshControl,
-  Alert,
-} from "react-native";
+import { View, Text, FlatList, Pressable, Alert } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../lib/supabase";
@@ -24,7 +17,7 @@ export default function HomeScreen() {
   const { user, signOut } = useAuth();
   const [rejections, setRejections] = useState<Rejection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
+
   const [percentile, setPercentile] = useState<number | null>(null);
 
   const chartData = useMemo(
@@ -61,7 +54,6 @@ export default function HomeScreen() {
       fetchPercentile(data?.length || 0);
     }
     setLoading(false);
-    setRefreshing(false);
   };
 
   const fetchPercentile = async (myCount: number) => {
@@ -95,11 +87,6 @@ export default function HomeScreen() {
       fetchRejections();
     }, [user]),
   );
-
-  const handleRefresh = () => {
-    setRefreshing(true);
-    fetchRejections();
-  };
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("rejections").delete().eq("id", id);
@@ -146,14 +133,17 @@ export default function HomeScreen() {
           justifyContent: "space-between",
           alignItems: "center",
           paddingHorizontal: 20,
-          paddingVertical: 12,
+          paddingVertical: 14,
+          borderBottomWidth: 1,
+          borderBottomColor: colors.borderSubtle,
         }}
       >
         <Text
           style={{
-            fontSize: 24,
+            fontSize: 22,
             fontFamily: fonts.accent,
             color: colors.primary,
+            letterSpacing: 0.5,
           }}
         >
           1000 Rejections
@@ -162,16 +152,21 @@ export default function HomeScreen() {
           onPress={handleSignOut}
           style={({ pressed }) => ({
             paddingVertical: 6,
-            paddingHorizontal: 12,
+            paddingHorizontal: 14,
             borderRadius: 8,
-            backgroundColor: pressed ? colors.surfaceLight : "transparent",
+            backgroundColor: pressed
+              ? colors.surfaceLight
+              : colors.surfaceElevated,
+            borderWidth: 1,
+            borderColor: pressed ? colors.border : colors.borderSubtle,
           })}
         >
           <Text
             style={{
               fontFamily: fonts.regular,
               color: colors.textMuted,
-              fontSize: 14,
+              fontSize: 13,
+              letterSpacing: 0.2,
             }}
           >
             Sign Out
@@ -206,18 +201,19 @@ export default function HomeScreen() {
                     marginHorizontal: 16,
                     marginBottom: 16,
                     padding: 16,
-                    backgroundColor: `${colors.warning}15`,
+                    backgroundColor: `${colors.warning}10`,
                     borderRadius: 12,
                     borderWidth: 1,
-                    borderColor: `${colors.warning}30`,
+                    borderColor: `${colors.warning}20`,
                   }}
                 >
                   <Text
                     style={{
-                      fontSize: 16,
+                      fontSize: 15,
                       fontFamily: fonts.bold,
                       color: colors.warning,
                       textAlign: "center",
+                      letterSpacing: -0.2,
                     }}
                   >
                     You're not getting rejected enough!
@@ -226,9 +222,10 @@ export default function HomeScreen() {
                     style={{
                       fontSize: 14,
                       fontFamily: fonts.regular,
-                      color: colors.textMuted,
+                      color: `${colors.textMuted}CC`,
                       textAlign: "center",
                       marginTop: 4,
+                      lineHeight: 20,
                     }}
                   >
                     Do things more outside of the box. Take bigger swings!
@@ -243,14 +240,17 @@ export default function HomeScreen() {
                     padding: 16,
                     backgroundColor: colors.celebration,
                     borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: `${colors.primary}20`,
                   }}
                 >
                   <Text
                     style={{
-                      fontSize: 16,
+                      fontSize: 15,
                       fontFamily: fonts.bold,
                       color: colors.primary,
                       textAlign: "center",
+                      letterSpacing: -0.2,
                     }}
                   >
                     You're in the top {100 - percentile}% of rejection loggers!
@@ -276,13 +276,6 @@ export default function HomeScreen() {
             onAddFirst={() => router.push("/(main)/add")}
           />
         }
-        refreshControl={
-          <RefreshControl
-            refreshing={refreshing}
-            onRefresh={handleRefresh}
-            tintColor={colors.primary}
-          />
-        }
         contentContainerStyle={{ paddingBottom: 100 }}
       />
 
@@ -290,28 +283,28 @@ export default function HomeScreen() {
         style={({ pressed }) => ({
           position: "absolute",
           right: 24,
-          bottom: 32,
-          width: 64,
-          height: 64,
-          borderRadius: 32,
+          bottom: 36,
+          width: 60,
+          height: 60,
+          borderRadius: 30,
           backgroundColor: colors.primary,
           justifyContent: "center",
           alignItems: "center",
           shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
+          shadowOffset: { width: 0, height: 6 },
           shadowOpacity: 0.4,
-          shadowRadius: 12,
-          elevation: 8,
-          opacity: pressed ? 0.8 : 1,
+          shadowRadius: 16,
+          elevation: 10,
+          transform: [{ scale: pressed ? 0.93 : 1 }],
         })}
         onPress={() => router.push("/(main)/add")}
       >
         <Text
           style={{
-            fontSize: 32,
+            fontSize: 28,
             color: colors.onPrimary,
             fontWeight: "300",
-            marginTop: -2,
+            marginTop: -1,
           }}
         >
           +

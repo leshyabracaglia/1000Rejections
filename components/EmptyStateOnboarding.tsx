@@ -47,17 +47,20 @@ export function EmptyStateOnboarding({
     },
   ).current;
 
-  const viewabilityConfig = useRef({ viewAreaCoveragePercentThreshold: 50 }).current;
+  const viewabilityConfig = useRef({
+    viewAreaCoveragePercentThreshold: 50,
+  }).current;
 
   return (
-    <View style={{ paddingTop: 16, paddingBottom: 32 }}>
+    <View style={{ paddingTop: 20, paddingBottom: 32 }}>
       <Text
         style={{
           fontSize: 22,
           fontFamily: fonts.bold,
           color: colors.text,
           textAlign: "center",
-          marginBottom: 4,
+          marginBottom: 6,
+          letterSpacing: -0.3,
         }}
       >
         Welcome to 1000 Rejections
@@ -68,7 +71,7 @@ export function EmptyStateOnboarding({
           fontFamily: fonts.regular,
           color: colors.textMuted,
           textAlign: "center",
-          marginBottom: 24,
+          marginBottom: 28,
           paddingHorizontal: 32,
           lineHeight: 22,
         }}
@@ -93,37 +96,35 @@ export function EmptyStateOnboarding({
             style={{
               width: cardWidth,
               marginRight: index < STEPS.length - 1 ? 12 : 0,
-              backgroundColor: "#242424",
+              backgroundColor: colors.surfaceElevated,
               borderRadius: 16,
               padding: 28,
               alignItems: "center",
-              borderTopWidth: 1,
-              borderTopColor: "#333333",
-              borderBottomWidth: 2,
-              borderBottomColor: "#0A0A0A",
+              borderWidth: 1,
+              borderColor: colors.borderSubtle,
             }}
           >
             <View
               style={{
-                width: 64,
-                height: 64,
-                borderRadius: 32,
-                backgroundColor: `${colors.primary}18`,
+                width: 56,
+                height: 56,
+                borderRadius: 28,
+                backgroundColor: `${colors.primary}12`,
                 justifyContent: "center",
                 alignItems: "center",
-                marginBottom: 16,
+                marginBottom: 18,
               }}
             >
-              <Text style={{ fontSize: 30 }}>{item.icon}</Text>
+              <Text style={{ fontSize: 26 }}>{item.icon}</Text>
             </View>
             <Text
               style={{
-                fontSize: 13,
+                fontSize: 11,
                 fontFamily: fonts.accent,
                 color: colors.primary,
-                letterSpacing: 1.5,
+                letterSpacing: 2,
                 textTransform: "uppercase",
-                marginBottom: 6,
+                marginBottom: 8,
               }}
             >
               Step {index + 1}
@@ -135,6 +136,7 @@ export function EmptyStateOnboarding({
                 color: colors.text,
                 textAlign: "center",
                 marginBottom: 10,
+                letterSpacing: -0.2,
               }}
             >
               {item.title}
@@ -158,7 +160,7 @@ export function EmptyStateOnboarding({
         style={{
           flexDirection: "row",
           justifyContent: "center",
-          gap: 8,
+          gap: 6,
           marginTop: 20,
         }}
       >
@@ -166,11 +168,11 @@ export function EmptyStateOnboarding({
           <View
             key={i}
             style={{
-              width: i === activeIndex ? 20 : 8,
-              height: 8,
-              borderRadius: 4,
+              width: i === activeIndex ? 20 : 6,
+              height: 6,
+              borderRadius: 3,
               backgroundColor:
-                i === activeIndex ? colors.primary : `${colors.primary}40`,
+                i === activeIndex ? colors.primary : `${colors.primary}30`,
             }}
           />
         ))}
@@ -178,17 +180,17 @@ export function EmptyStateOnboarding({
 
       <Pressable
         style={({ pressed }) => ({
-          marginTop: 28,
+          marginTop: 32,
           marginHorizontal: 32,
           paddingVertical: 16,
           borderRadius: 14,
           backgroundColor: colors.primary,
           alignItems: "center",
-          opacity: pressed ? 0.85 : 1,
+          opacity: pressed ? 0.9 : 1,
           shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.4,
-          shadowRadius: 12,
+          shadowOffset: { width: 0, height: 6 },
+          shadowOpacity: 0.35,
+          shadowRadius: 16,
           elevation: 8,
         })}
         onPress={onAddFirst}
@@ -198,6 +200,7 @@ export function EmptyStateOnboarding({
             fontSize: 16,
             fontFamily: fonts.bold,
             color: colors.onPrimary,
+            letterSpacing: 0.3,
           }}
         >
           Log your first ask
@@ -208,9 +211,9 @@ export function EmptyStateOnboarding({
         style={{
           fontSize: 13,
           fontFamily: fonts.regular,
-          color: colors.textMuted,
+          color: `${colors.textMuted}88`,
           textAlign: "center",
-          marginTop: 12,
+          marginTop: 14,
           paddingHorizontal: 48,
           lineHeight: 20,
         }}

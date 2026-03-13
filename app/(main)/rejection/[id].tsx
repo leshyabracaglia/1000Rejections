@@ -166,10 +166,12 @@ export default function EditRejectionScreen() {
       <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
         <Text
           style={{
-            fontSize: 14,
-            fontFamily: fonts.regular,
+            fontSize: 12,
+            fontFamily: fonts.accent,
             color: colors.textMuted,
-            marginBottom: 8,
+            marginBottom: 10,
+            letterSpacing: 1,
+            textTransform: "uppercase",
           }}
         >
           Status
@@ -185,11 +187,11 @@ export default function EditRejectionScreen() {
                   flex: 1,
                   paddingVertical: 10,
                   borderRadius: 10,
-                  backgroundColor: isActive ? `${color}20` : "transparent",
+                  backgroundColor: isActive ? `${color}15` : "transparent",
                   borderWidth: 1,
-                  borderColor: isActive ? color : colors.border,
+                  borderColor: isActive ? `${color}50` : colors.borderSubtle,
                   alignItems: "center",
-                  opacity: pressed ? 0.7 : 1,
+                  opacity: pressed ? 0.85 : 1,
                 })}
                 onPress={() => handleStatusChange(s)}
               >
@@ -197,7 +199,8 @@ export default function EditRejectionScreen() {
                   style={{
                     fontSize: 13,
                     fontFamily: fonts.bold,
-                    color: isActive ? color : colors.textMuted,
+                    color: isActive ? color : `${colors.textMuted}88`,
+                    letterSpacing: 0.2,
                   }}
                 >
                   {s.charAt(0).toUpperCase() + s.slice(1)}
@@ -224,14 +227,19 @@ export default function EditRejectionScreen() {
           padding: 16,
           borderRadius: 12,
           borderWidth: 1,
-          borderColor: colors.error,
+          borderColor: pressed ? colors.error : `${colors.error}50`,
+          backgroundColor: pressed ? `${colors.error}10` : "transparent",
           alignItems: "center",
-          opacity: pressed ? 0.7 : 1,
         })}
         onPress={handleDelete}
       >
         <Text
-          style={{ color: colors.error, fontSize: 16, fontFamily: fonts.bold }}
+          style={{
+            color: colors.error,
+            fontSize: 15,
+            fontFamily: fonts.bold,
+            letterSpacing: 0.2,
+          }}
         >
           Delete Event
         </Text>

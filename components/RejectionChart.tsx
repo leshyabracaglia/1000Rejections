@@ -25,19 +25,23 @@ export function RejectionChart({ data }: RejectionChartProps) {
   return (
     <View
       style={{
-        backgroundColor: colors.surface,
+        backgroundColor: colors.surfaceElevated,
         borderRadius: 16,
         marginHorizontal: 16,
         marginBottom: 16,
         padding: 16,
+        borderWidth: 1,
+        borderColor: colors.borderSubtle,
       }}
     >
       <Text
         style={{
-          fontSize: 14,
-          fontFamily: fonts.bold,
+          fontSize: 11,
+          fontFamily: fonts.accent,
           color: colors.textMuted,
-          marginBottom: 4,
+          marginBottom: 8,
+          letterSpacing: 1.5,
+          textTransform: "uppercase",
         }}
       >
         Results Over Time
@@ -47,8 +51,8 @@ export function RejectionChart({ data }: RejectionChartProps) {
           <View
             style={{
               width: 12,
-              height: 3,
-              borderRadius: 2,
+              height: 2,
+              borderRadius: 1,
               backgroundColor: colors.primary,
             }}
           />
@@ -66,8 +70,8 @@ export function RejectionChart({ data }: RejectionChartProps) {
           <View
             style={{
               width: 12,
-              height: 3,
-              borderRadius: 2,
+              height: 2,
+              borderRadius: 1,
               backgroundColor: colors.success,
             }}
           />
@@ -85,8 +89,8 @@ export function RejectionChart({ data }: RejectionChartProps) {
           <View
             style={{
               width: 12,
-              height: 3,
-              borderRadius: 2,
+              height: 2,
+              borderRadius: 1,
               backgroundColor: colors.warning,
             }}
           />
@@ -129,18 +133,18 @@ export function RejectionChart({ data }: RejectionChartProps) {
         withOuterLines={false}
         fromZero
         chartConfig={{
-          backgroundGradientFrom: colors.surface,
-          backgroundGradientTo: colors.surface,
+          backgroundGradientFrom: colors.surfaceElevated,
+          backgroundGradientTo: colors.surfaceElevated,
           color: () => colors.textMuted,
-          labelColor: () => colors.textMuted,
+          labelColor: () => `${colors.textMuted}99`,
           propsForDots: {
-            r: "4",
-            strokeWidth: "2",
-            fill: colors.surface,
+            r: "3",
+            strokeWidth: "1.5",
+            fill: colors.surfaceElevated,
           },
           decimalPlaces: 0,
           propsForBackgroundLines: {
-            stroke: colors.surfaceLight,
+            stroke: colors.borderSubtle,
             strokeDasharray: "",
           },
         }}

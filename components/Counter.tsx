@@ -14,13 +14,20 @@ function StatusDot({ color, label }: { color: string; label: string }) {
     <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
       <View
         style={{
-          width: 8,
-          height: 8,
-          borderRadius: 4,
+          width: 7,
+          height: 7,
+          borderRadius: 3.5,
           backgroundColor: color,
         }}
       />
-      <Text style={{ fontSize: 13, fontFamily: fonts.regular, color }}>
+      <Text
+        style={{
+          fontSize: 13,
+          fontFamily: fonts.regular,
+          color: colors.textMuted,
+          letterSpacing: 0.2,
+        }}
+      >
         {label}
       </Text>
     </View>
@@ -32,27 +39,23 @@ export function Counter({ total, pending, rejected, accepted }: CounterProps) {
     <View
       style={{
         marginHorizontal: 16,
-        marginVertical: 10,
+        marginVertical: 12,
         borderRadius: 16,
-        backgroundColor: "#0D0D0D",
+        backgroundColor: colors.surfaceElevated,
+        borderWidth: 1,
+        borderColor: colors.borderSubtle,
         shadowColor: "#000",
-        shadowOffset: { width: 0, height: 6 },
-        shadowOpacity: 0.4,
-        shadowRadius: 10,
+        shadowOffset: { width: 0, height: 8 },
+        shadowOpacity: 0.25,
+        shadowRadius: 16,
         elevation: 8,
       }}
     >
       <View
         style={{
           alignItems: "center",
-          paddingVertical: 24,
-          paddingHorizontal: 20,
-          backgroundColor: "#242424",
-          borderRadius: 16,
-          borderTopWidth: 1,
-          borderTopColor: "#333333",
-          borderBottomWidth: 2,
-          borderBottomColor: "#0A0A0A",
+          paddingVertical: 28,
+          paddingHorizontal: 24,
         }}
       >
         <Text
@@ -67,19 +70,28 @@ export function Counter({ total, pending, rejected, accepted }: CounterProps) {
         </Text>
         <Text
           style={{
-            fontSize: 15,
+            fontSize: 13,
             fontFamily: fonts.regular,
             color: colors.textMuted,
             marginTop: 6,
+            letterSpacing: 1.5,
+            textTransform: "uppercase",
           }}
         >
           Total Events
         </Text>
         <View
           style={{
+            width: 40,
+            height: 1,
+            backgroundColor: colors.borderSubtle,
+            marginVertical: 16,
+          }}
+        />
+        <View
+          style={{
             flexDirection: "row",
-            marginTop: 12,
-            gap: 16,
+            gap: 20,
             flexWrap: "wrap",
             justifyContent: "center",
           }}
