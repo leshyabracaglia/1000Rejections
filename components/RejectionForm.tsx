@@ -1,16 +1,9 @@
 import React, { useState } from "react";
-import {
-  View,
-  Text,
-  TextInput,
-  Pressable,
-  ScrollView,
-  Platform,
-  ActivityIndicator,
-} from "react-native";
+import { View, Text, Pressable, ScrollView, Platform } from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ImagePickerButton } from "./ImagePickerButton";
 import { colors, fonts } from "../constants/theme";
+import { Button, TextField, FormField } from "./ui";
 
 interface RejectionFormProps {
   initialValues?: {
@@ -75,82 +68,33 @@ export function RejectionForm({
     year: "numeric",
   });
 
-  const inputStyle = {
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: colors.text,
-    fontFamily: fonts.regular,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
-  };
-
   return (
     <ScrollView
       style={{ flex: 1, padding: 16 }}
       keyboardShouldPersistTaps="handled"
     >
-      <View style={{ marginBottom: 20 }}>
-        <Text
-          style={{
-            fontSize: 12,
-            fontFamily: fonts.accent,
-            color: colors.textMuted,
-            marginBottom: 8,
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}
-        >
-          Title *
-        </Text>
-        <TextInput
-          style={inputStyle}
-          value={title}
-          onChangeText={setTitle}
-          placeholder="What did you apply for?"
-          placeholderTextColor={`${colors.textMuted}77`}
-        />
-      </View>
+      <TextField
+        label="Title"
+        required
+        value={title}
+        onChangeText={setTitle}
+        placeholder="What did you apply for?"
+        containerStyle={{ marginBottom: 20 }}
+      />
 
-      <View style={{ marginBottom: 20 }}>
-        <Text
-          style={{
-            fontSize: 12,
-            fontFamily: fonts.accent,
-            color: colors.textMuted,
-            marginBottom: 8,
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}
-        >
-          Description
-        </Text>
-        <TextInput
-          style={{ ...inputStyle, minHeight: 100 }}
-          value={description}
-          onChangeText={setDescription}
-          placeholder="Add any notes or details..."
-          placeholderTextColor={`${colors.textMuted}77`}
-          multiline
-          numberOfLines={4}
-          textAlignVertical="top"
-        />
-      </View>
+      <TextField
+        label="Description"
+        value={description}
+        onChangeText={setDescription}
+        placeholder="Add any notes or details..."
+        multiline
+        numberOfLines={4}
+        textAlignVertical="top"
+        inputStyle={{ minHeight: 100 }}
+        containerStyle={{ marginBottom: 20 }}
+      />
 
-      <View style={{ marginBottom: 20 }}>
-        <Text
-          style={{
-            fontSize: 12,
-            fontFamily: fonts.accent,
-            color: colors.textMuted,
-            marginBottom: 8,
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}
-        >
-          Date
-        </Text>
+      <FormField label="Date">
         <Pressable
           style={({ pressed }) => ({
             backgroundColor: colors.surfaceElevated,
@@ -186,7 +130,7 @@ export function RejectionForm({
             themeVariant="dark"
           />
         )}
-      </View>
+      </FormField>
 
       <ImagePickerButton imageUri={imageUri} onImageSelected={setImageUri} />
 
@@ -203,39 +147,12 @@ export function RejectionForm({
         </Text>
       )}
 
-      <Pressable
-        style={({ pressed }) => ({
-          backgroundColor: colors.primary,
-          borderRadius: 14,
-          padding: 18,
-          alignItems: "center",
-          marginTop: 16,
-          marginBottom: 32,
-          opacity: loading ? 0.6 : pressed ? 0.9 : 1,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 4 },
-          shadowOpacity: 0.3,
-          shadowRadius: 12,
-          elevation: 6,
-        })}
+      <Button
+        label={submitLabel}
         onPress={handleSubmit}
-        disabled={loading}
-      >
-        {loading ? (
-          <ActivityIndicator color={colors.onPrimary} />
-        ) : (
-          <Text
-            style={{
-              color: colors.onPrimary,
-              fontSize: 16,
-              fontFamily: fonts.bold,
-              letterSpacing: 0.3,
-            }}
-          >
-            {submitLabel}
-          </Text>
-        )}
-      </Pressable>
+        loading={loading}
+        style={{ marginTop: 16, marginBottom: 32 }}
+      />
     </ScrollView>
   );
 }

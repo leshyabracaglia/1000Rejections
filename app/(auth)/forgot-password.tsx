@@ -2,15 +2,14 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   Pressable,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { router } from "expo-router";
 import { useAuth } from "../../lib/auth";
 import { colors, fonts } from "../../constants/theme";
+import { Button, TextField, Card } from "../../components/ui";
 
 export default function ForgotPasswordScreen() {
   const { resetPassword } = useAuth();
@@ -91,14 +90,12 @@ export default function ForgotPasswordScreen() {
         </Text>
 
         {sent ? (
-          <View
+          <Card
+            shadow="sm"
             style={{
-              backgroundColor: colors.surfaceElevated,
-              borderRadius: 14,
               padding: 28,
               alignItems: "center",
-              borderWidth: 1,
-              borderColor: colors.borderSubtle,
+              borderRadius: 14,
             }}
           >
             <Text
@@ -123,50 +120,16 @@ export default function ForgotPasswordScreen() {
               We sent a password reset link to {email.trim()}. Follow the link
               to set a new password.
             </Text>
-            <Pressable
-              style={({ pressed }) => ({
-                backgroundColor: colors.primary,
-                borderRadius: 14,
-                paddingVertical: 14,
-                paddingHorizontal: 32,
-                marginTop: 24,
-                opacity: pressed ? 0.9 : 1,
-                shadowColor: colors.primary,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 12,
-                elevation: 6,
-              })}
+            <Button
+              label="Back to Sign In"
               onPress={() => router.back()}
-            >
-              <Text
-                style={{
-                  color: colors.onPrimary,
-                  fontSize: 16,
-                  fontFamily: fonts.bold,
-                  letterSpacing: 0.3,
-                }}
-              >
-                Back to Sign In
-              </Text>
-            </Pressable>
-          </View>
+              style={{ marginTop: 24, paddingHorizontal: 32 }}
+            />
+          </Card>
         ) : (
           <>
-            <TextInput
-              style={{
-                backgroundColor: colors.surfaceElevated,
-                borderRadius: 12,
-                padding: 16,
-                fontSize: 16,
-                color: colors.text,
-                fontFamily: fonts.regular,
-                marginBottom: 14,
-                borderWidth: 1,
-                borderColor: colors.borderSubtle,
-              }}
+            <TextField
               placeholder="Email"
-              placeholderTextColor={`${colors.textMuted}77`}
               value={email}
               onChangeText={setEmail}
               autoCapitalize="none"
@@ -189,37 +152,11 @@ export default function ForgotPasswordScreen() {
               </Text>
             )}
 
-            <Pressable
-              style={({ pressed }) => ({
-                backgroundColor: colors.primary,
-                borderRadius: 14,
-                padding: 18,
-                alignItems: "center",
-                opacity: loading ? 0.6 : pressed ? 0.9 : 1,
-                shadowColor: colors.primary,
-                shadowOffset: { width: 0, height: 4 },
-                shadowOpacity: 0.3,
-                shadowRadius: 12,
-                elevation: 6,
-              })}
+            <Button
+              label="Send Reset Link"
               onPress={handleReset}
-              disabled={loading}
-            >
-              {loading ? (
-                <ActivityIndicator color={colors.onPrimary} />
-              ) : (
-                <Text
-                  style={{
-                    color: colors.onPrimary,
-                    fontSize: 16,
-                    fontFamily: fonts.bold,
-                    letterSpacing: 0.3,
-                  }}
-                >
-                  Send Reset Link
-                </Text>
-              )}
-            </Pressable>
+              loading={loading}
+            />
           </>
         )}
       </View>

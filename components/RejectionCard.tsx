@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Pressable, Image, Alert } from "react-native";
 import { Rejection, RejectionStatus } from "../types";
 import { colors, fonts } from "../constants/theme";
+import { Badge, Button } from "./ui";
 
 const statusColors: Record<RejectionStatus, string> = {
   pending: colors.warning,
@@ -105,28 +106,11 @@ export function RejectionCard({
             >
               {rejection.title}
             </Text>
-            <View
-              style={{
-                paddingHorizontal: 10,
-                paddingVertical: 3,
-                borderRadius: 6,
-                backgroundColor: `${borderColor}15`,
-                borderWidth: 1,
-                borderColor: `${borderColor}25`,
-                marginLeft: 10,
-              }}
-            >
-              <Text
-                style={{
-                  fontSize: 11,
-                  fontFamily: fonts.bold,
-                  color: borderColor,
-                  letterSpacing: 0.3,
-                }}
-              >
-                {statusLabels[status]}
-              </Text>
-            </View>
+            <Badge
+              label={statusLabels[status]}
+              color={borderColor}
+              style={{ marginLeft: 10 }}
+            />
           </View>
           {rejection.description && (
             <Text

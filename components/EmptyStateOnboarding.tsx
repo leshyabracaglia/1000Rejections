@@ -2,12 +2,12 @@ import React, { useRef, useState } from "react";
 import {
   View,
   Text,
-  Pressable,
   FlatList,
   useWindowDimensions,
   ViewToken,
 } from "react-native";
 import { colors, fonts } from "../constants/theme";
+import { Card, Button } from "./ui";
 
 const STEPS = [
   {
@@ -92,16 +92,13 @@ export function EmptyStateOnboarding({
         onViewableItemsChanged={onViewableItemsChanged}
         viewabilityConfig={viewabilityConfig}
         renderItem={({ item, index }) => (
-          <View
+          <Card
+            shadow="sm"
             style={{
               width: cardWidth,
               marginRight: index < STEPS.length - 1 ? 12 : 0,
-              backgroundColor: colors.surfaceElevated,
-              borderRadius: 16,
               padding: 28,
               alignItems: "center",
-              borderWidth: 1,
-              borderColor: colors.borderSubtle,
             }}
           >
             <View
@@ -152,7 +149,7 @@ export function EmptyStateOnboarding({
             >
               {item.body}
             </Text>
-          </View>
+          </Card>
         )}
       />
 
@@ -178,34 +175,11 @@ export function EmptyStateOnboarding({
         ))}
       </View>
 
-      <Pressable
-        style={({ pressed }) => ({
-          marginTop: 32,
-          marginHorizontal: 32,
-          paddingVertical: 16,
-          borderRadius: 14,
-          backgroundColor: colors.primary,
-          alignItems: "center",
-          opacity: pressed ? 0.9 : 1,
-          shadowColor: colors.primary,
-          shadowOffset: { width: 0, height: 6 },
-          shadowOpacity: 0.35,
-          shadowRadius: 16,
-          elevation: 8,
-        })}
+      <Button
+        label="Log your first ask"
         onPress={onAddFirst}
-      >
-        <Text
-          style={{
-            fontSize: 16,
-            fontFamily: fonts.bold,
-            color: colors.onPrimary,
-            letterSpacing: 0.3,
-          }}
-        >
-          Log your first ask
-        </Text>
-      </Pressable>
+        style={{ marginTop: 32, marginHorizontal: 32 }}
+      />
 
       <Text
         style={{

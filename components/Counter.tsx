@@ -1,6 +1,7 @@
 import React from "react";
 import { View, Text } from "react-native";
 import { colors, fonts } from "../constants/theme";
+import { Card, Divider } from "./ui";
 
 interface CounterProps {
   total: number;
@@ -36,20 +37,9 @@ function StatusDot({ color, label }: { color: string; label: string }) {
 
 export function Counter({ total, pending, rejected, accepted }: CounterProps) {
   return (
-    <View
-      style={{
-        marginHorizontal: 16,
-        marginVertical: 12,
-        borderRadius: 16,
-        backgroundColor: colors.surfaceElevated,
-        borderWidth: 1,
-        borderColor: colors.borderSubtle,
-        shadowColor: "#000",
-        shadowOffset: { width: 0, height: 8 },
-        shadowOpacity: 0.25,
-        shadowRadius: 16,
-        elevation: 8,
-      }}
+    <Card
+      shadow="lg"
+      style={{ marginHorizontal: 16, marginVertical: 12 }}
     >
       <View
         style={{
@@ -80,14 +70,7 @@ export function Counter({ total, pending, rejected, accepted }: CounterProps) {
         >
           Total Events
         </Text>
-        <View
-          style={{
-            width: 40,
-            height: 1,
-            backgroundColor: colors.borderSubtle,
-            marginVertical: 16,
-          }}
-        />
+        <Divider width={40} style={{ marginVertical: 16 }} />
         <View
           style={{
             flexDirection: "row",
@@ -101,6 +84,6 @@ export function Counter({ total, pending, rejected, accepted }: CounterProps) {
           <StatusDot color={colors.success} label={`${accepted} accepted`} />
         </View>
       </View>
-    </View>
+    </Card>
   );
 }

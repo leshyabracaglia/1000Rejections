@@ -2,15 +2,14 @@ import React, { useState } from "react";
 import {
   View,
   Text,
-  TextInput,
   Pressable,
-  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
 } from "react-native";
 import { Link, router } from "expo-router";
 import { useAuth } from "../../lib/auth";
 import { colors, fonts } from "../../constants/theme";
+import { Button, TextField } from "../../components/ui";
 
 export default function LoginScreen() {
   const { signIn } = useAuth();
@@ -35,18 +34,6 @@ export default function LoginScreen() {
     } else {
       router.replace("/(main)");
     }
-  };
-
-  const inputStyle = {
-    backgroundColor: colors.surfaceElevated,
-    borderRadius: 12,
-    padding: 16,
-    fontSize: 16,
-    color: colors.text,
-    fontFamily: fonts.regular,
-    marginBottom: 14,
-    borderWidth: 1,
-    borderColor: colors.borderSubtle,
   };
 
   return (
@@ -82,20 +69,16 @@ export default function LoginScreen() {
           Embrace rejection, build resilience
         </Text>
 
-        <TextInput
-          style={inputStyle}
+        <TextField
           placeholder="Email"
-          placeholderTextColor={`${colors.textMuted}77`}
           value={email}
           onChangeText={setEmail}
           autoCapitalize="none"
           keyboardType="email-address"
           autoCorrect={false}
         />
-        <TextInput
-          style={inputStyle}
+        <TextField
           placeholder="Password"
-          placeholderTextColor={`${colors.textMuted}77`}
           value={password}
           onChangeText={setPassword}
           secureTextEntry
@@ -115,37 +98,7 @@ export default function LoginScreen() {
           </Text>
         )}
 
-        <Pressable
-          style={({ pressed }) => ({
-            backgroundColor: colors.primary,
-            borderRadius: 14,
-            padding: 18,
-            alignItems: "center",
-            opacity: loading ? 0.6 : pressed ? 0.9 : 1,
-            shadowColor: colors.primary,
-            shadowOffset: { width: 0, height: 4 },
-            shadowOpacity: 0.3,
-            shadowRadius: 12,
-            elevation: 6,
-          })}
-          onPress={handleLogin}
-          disabled={loading}
-        >
-          {loading ? (
-            <ActivityIndicator color={colors.onPrimary} />
-          ) : (
-            <Text
-              style={{
-                color: colors.onPrimary,
-                fontSize: 16,
-                fontFamily: fonts.bold,
-                letterSpacing: 0.3,
-              }}
-            >
-              Sign In
-            </Text>
-          )}
-        </Pressable>
+        <Button label="Sign In" onPress={handleLogin} loading={loading} />
 
         <Link href="/(auth)/forgot-password" asChild>
           <Pressable style={{ alignSelf: "center", marginTop: 20 }}>

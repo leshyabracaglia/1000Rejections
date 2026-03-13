@@ -1,5 +1,12 @@
 import React, { useCallback, useMemo, useState } from "react";
-import { View, Text, FlatList, Pressable, Alert } from "react-native";
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Alert,
+} from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { supabase } from "../../lib/supabase";
@@ -12,12 +19,13 @@ import { RejectionChart } from "../../components/RejectionChart";
 import { EmptyStateOnboarding } from "../../components/EmptyStateOnboarding";
 import { aggregateByMonthMulti } from "../../lib/chartUtils";
 import { colors, fonts } from "../../constants/theme";
+import { Button } from "../../components/ui";
 
 export default function HomeScreen() {
   const { user, signOut } = useAuth();
   const [rejections, setRejections] = useState<Rejection[]>([]);
   const [loading, setLoading] = useState(true);
-
+  const [refreshing, setRefreshing] = useState(false);
   const [percentile, setPercentile] = useState<number | null>(null);
 
   const chartData = useMemo(
@@ -54,6 +62,7 @@ export default function HomeScreen() {
       fetchPercentile(data?.length || 0);
     }
     setLoading(false);
+    setRefreshing(false);
   };
 
   const fetchPercentile = async (myCount: number) => {
@@ -87,6 +96,11 @@ export default function HomeScreen() {
       fetchRejections();
     }, [user]),
   );
+
+  const handleRefresh = () => {
+    setRefreshing(true);
+    fetchRejections();
+  };
 
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("rejections").delete().eq("id", id);
@@ -148,30 +162,13 @@ export default function HomeScreen() {
         >
           1000 Rejections
         </Text>
-        <Pressable
+        <Button
+          label="Sign Out"
+          variant="ghost"
           onPress={handleSignOut}
-          style={({ pressed }) => ({
-            paddingVertical: 6,
-            paddingHorizontal: 14,
-            borderRadius: 8,
-            backgroundColor: pressed
-              ? colors.surfaceLight
-              : colors.surfaceElevated,
-            borderWidth: 1,
-            borderColor: pressed ? colors.border : colors.borderSubtle,
-          })}
-        >
-          <Text
-            style={{
-              fontFamily: fonts.regular,
-              color: colors.textMuted,
-              fontSize: 13,
-              letterSpacing: 0.2,
-            }}
-          >
-            Sign Out
-          </Text>
-        </Pressable>
+          style={{ paddingVertical: 6, paddingHorizontal: 14, padding: 0 }}
+          textStyle={{ fontSize: 13 }}
+        />
       </View>
 
       <FlatList
@@ -274,6 +271,13 @@ export default function HomeScreen() {
         ListEmptyComponent={
           <EmptyStateOnboarding
             onAddFirst={() => router.push("/(main)/add")}
+          />
+        }
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
           />
         }
         contentContainerStyle={{ paddingBottom: 100 }}

@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, Pressable, Image, Alert } from "react-native";
 import * as ImagePicker from "expo-image-picker";
 import { colors, fonts } from "../constants/theme";
+import { FormField } from "./ui";
 
 interface ImagePickerButtonProps {
   imageUri: string | null;
@@ -74,19 +75,7 @@ export function ImagePickerButton({
   };
 
   return (
-    <View style={{ marginBottom: 16 }}>
-      <Text
-        style={{
-          fontSize: 12,
-          fontFamily: fonts.accent,
-          color: colors.textMuted,
-          marginBottom: 8,
-          letterSpacing: 1,
-          textTransform: "uppercase",
-        }}
-      >
-        Image (optional)
-      </Text>
+    <FormField label="Image (optional)" style={{ marginBottom: 16 }}>
       <Pressable
         style={({ pressed }) => ({
           borderRadius: 12,
@@ -133,6 +122,6 @@ export function ImagePickerButton({
           </View>
         )}
       </Pressable>
-    </View>
+    </FormField>
   );
 }

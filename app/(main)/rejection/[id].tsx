@@ -8,6 +8,7 @@ import { Rejection, RejectionStatus, normalizeRejection } from "../../../types";
 import * as FileSystem from "expo-file-system/legacy";
 import { decode } from "base64-arraybuffer";
 import { colors, fonts } from "../../../constants/theme";
+import { Button, FormField } from "../../../components/ui";
 
 const statusColors: Record<RejectionStatus, string> = {
   pending: colors.warning,
@@ -164,51 +165,41 @@ export default function EditRejectionScreen() {
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
-        <Text
-          style={{
-            fontSize: 12,
-            fontFamily: fonts.accent,
-            color: colors.textMuted,
-            marginBottom: 10,
-            letterSpacing: 1,
-            textTransform: "uppercase",
-          }}
-        >
-          Status
-        </Text>
-        <View style={{ flexDirection: "row", gap: 8 }}>
-          {(["pending", "rejected", "accepted"] as const).map((s) => {
-            const isActive = currentStatus === s;
-            const color = statusColors[s];
-            return (
-              <Pressable
-                key={s}
-                style={({ pressed }) => ({
-                  flex: 1,
-                  paddingVertical: 10,
-                  borderRadius: 10,
-                  backgroundColor: isActive ? `${color}15` : "transparent",
-                  borderWidth: 1,
-                  borderColor: isActive ? `${color}50` : colors.borderSubtle,
-                  alignItems: "center",
-                  opacity: pressed ? 0.85 : 1,
-                })}
-                onPress={() => handleStatusChange(s)}
-              >
-                <Text
-                  style={{
-                    fontSize: 13,
-                    fontFamily: fonts.bold,
-                    color: isActive ? color : `${colors.textMuted}88`,
-                    letterSpacing: 0.2,
-                  }}
+        <FormField label="Status">
+          <View style={{ flexDirection: "row", gap: 8 }}>
+            {(["pending", "rejected", "accepted"] as const).map((s) => {
+              const isActive = currentStatus === s;
+              const color = statusColors[s];
+              return (
+                <Pressable
+                  key={s}
+                  style={({ pressed }) => ({
+                    flex: 1,
+                    paddingVertical: 10,
+                    borderRadius: 10,
+                    backgroundColor: isActive ? `${color}15` : "transparent",
+                    borderWidth: 1,
+                    borderColor: isActive ? `${color}50` : colors.borderSubtle,
+                    alignItems: "center",
+                    opacity: pressed ? 0.85 : 1,
+                  })}
+                  onPress={() => handleStatusChange(s)}
                 >
-                  {s.charAt(0).toUpperCase() + s.slice(1)}
-                </Text>
-              </Pressable>
-            );
-          })}
-        </View>
+                  <Text
+                    style={{
+                      fontSize: 13,
+                      fontFamily: fonts.bold,
+                      color: isActive ? color : `${colors.textMuted}88`,
+                      letterSpacing: 0.2,
+                    }}
+                  >
+                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </FormField>
       </View>
       <RejectionForm
         initialValues={{
@@ -220,30 +211,13 @@ export default function EditRejectionScreen() {
         onSubmit={handleSubmit}
         submitLabel="Save Changes"
       />
-      <Pressable
-        style={({ pressed }) => ({
-          marginHorizontal: 16,
-          marginBottom: 32,
-          padding: 16,
-          borderRadius: 12,
-          borderWidth: 1,
-          borderColor: pressed ? colors.error : `${colors.error}50`,
-          backgroundColor: pressed ? `${colors.error}10` : "transparent",
-          alignItems: "center",
-        })}
+      <Button
+        label="Delete Event"
+        variant="danger"
         onPress={handleDelete}
-      >
-        <Text
-          style={{
-            color: colors.error,
-            fontSize: 15,
-            fontFamily: fonts.bold,
-            letterSpacing: 0.2,
-          }}
-        >
-          Delete Event
-        </Text>
-      </Pressable>
+        style={{ marginHorizontal: 16, marginBottom: 32 }}
+        textStyle={{ fontSize: 15 }}
+      />
     </View>
   );
 }

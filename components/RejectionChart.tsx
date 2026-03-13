@@ -3,6 +3,7 @@ import { View, Text, Dimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { colors, fonts } from "../constants/theme";
 import { MultiLineChartData } from "../lib/chartUtils";
+import { Card } from "./ui";
 
 export interface ChartDataPoint {
   label: string;
@@ -23,15 +24,12 @@ export function RejectionChart({ data }: RejectionChartProps) {
   if (!hasData) return null;
 
   return (
-    <View
+    <Card
+      shadow="sm"
       style={{
-        backgroundColor: colors.surfaceElevated,
-        borderRadius: 16,
         marginHorizontal: 16,
         marginBottom: 16,
         padding: 16,
-        borderWidth: 1,
-        borderColor: colors.borderSubtle,
       }}
     >
       <Text
@@ -151,6 +149,6 @@ export function RejectionChart({ data }: RejectionChartProps) {
         bezier
         style={{ borderRadius: 12 }}
       />
-    </View>
+    </Card>
   );
 }
