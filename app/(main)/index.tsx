@@ -1,16 +1,24 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { View, Text, FlatList, Pressable, RefreshControl, Alert } from 'react-native';
-import { useFocusEffect, router } from 'expo-router';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { supabase } from '../../lib/supabase';
-import { useAuth } from '../../lib/auth';
-import { Rejection } from '../../types';
-import { Counter } from '../../components/Counter';
-import { RejectionCard } from '../../components/RejectionCard';
-import { LoadingScreen } from '../../components/LoadingScreen';
-import { RejectionChart } from '../../components/RejectionChart';
-import { aggregateByMonth } from '../../lib/chartUtils';
-import { colors, fonts } from '../../constants/theme';
+import React, { useCallback, useMemo, useState } from "react";
+import {
+  View,
+  Text,
+  FlatList,
+  Pressable,
+  RefreshControl,
+  Alert,
+} from "react-native";
+import { useFocusEffect, router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { supabase } from "../../lib/supabase";
+import { useAuth } from "../../lib/auth";
+import { Rejection, RejectionStatus, normalizeRejection } from "../../types";
+import { Counter } from "../../components/Counter";
+import { RejectionCard } from "../../components/RejectionCard";
+import { LoadingScreen } from "../../components/LoadingScreen";
+import { RejectionChart } from "../../components/RejectionChart";
+import { EmptyStateOnboarding } from "../../components/EmptyStateOnboarding";
+import { aggregateByMonthMulti } from "../../lib/chartUtils";
+import { colors, fonts } from "../../constants/theme";
 
 export default function HomeScreen() {
   const { user, signOut } = useAuth();
@@ -18,21 +26,38 @@ export default function HomeScreen() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [percentile, setPercentile] = useState<number | null>(null);
-  const chartData = useMemo(() => aggregateByMonth(rejections, 6), [rejections]);
+
+  const chartData = useMemo(
+    () => aggregateByMonthMulti(rejections, 6),
+    [rejections],
+  );
+
+  const pendingCount = useMemo(
+    () => rejections.filter((r) => r.status === "pending").length,
+    [rejections],
+  );
+  const rejectedCount = useMemo(
+    () => rejections.filter((r) => r.status === "rejected").length,
+    [rejections],
+  );
+  const acceptedCount = useMemo(
+    () => rejections.filter((r) => r.status === "accepted").length,
+    [rejections],
+  );
 
   const fetchRejections = async () => {
     if (!user) return;
 
     const { data, error } = await supabase
-      .from('rejections')
-      .select('*')
-      .eq('user_id', user.id)
-      .order('date', { ascending: false });
+      .from("rejections")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("date", { ascending: false });
 
     if (error) {
-      console.error('Error fetching rejections:', error);
+      console.error("Error fetching rejections:", error);
     } else {
-      setRejections(data || []);
+      setRejections((data || []).map(normalizeRejection));
       fetchPercentile(data?.length || 0);
     }
     setLoading(false);
@@ -45,17 +70,13 @@ export default function HomeScreen() {
       return;
     }
 
-    // Get count of rejections per user
-    const { data, error } = await supabase
-      .from('rejections')
-      .select('user_id');
+    const { data, error } = await supabase.from("rejections").select("user_id");
 
     if (error || !data) {
       setPercentile(null);
       return;
     }
 
-    // Count rejections per user
     const userCounts: Record<string, number> = {};
     data.forEach((r) => {
       userCounts[r.user_id] = (userCounts[r.user_id] || 0) + 1;
@@ -65,7 +86,6 @@ export default function HomeScreen() {
     const totalUsers = counts.length;
     const usersWithFewer = counts.filter((c) => c < myCount).length;
 
-    // Calculate percentile (what % of users you beat)
     const pct = Math.round((usersWithFewer / totalUsers) * 100);
     setPercentile(pct);
   };
@@ -73,7 +93,7 @@ export default function HomeScreen() {
   useFocusEffect(
     useCallback(() => {
       fetchRejections();
-    }, [user])
+    }, [user]),
   );
 
   const handleRefresh = () => {
@@ -82,83 +102,201 @@ export default function HomeScreen() {
   };
 
   const handleDelete = async (id: string) => {
-    const { error } = await supabase.from('rejections').delete().eq('id', id);
+    const { error } = await supabase.from("rejections").delete().eq("id", id);
 
     if (error) {
-      Alert.alert('Error', 'Failed to delete rejection');
+      Alert.alert("Error", "Failed to delete event");
     } else {
       setRejections((prev) => prev.filter((r) => r.id !== id));
     }
   };
 
+  const handleStatusChange = async (id: string, status: RejectionStatus) => {
+    const { error } = await supabase
+      .from("rejections")
+      .update({ status })
+      .eq("id", id);
+
+    if (error) {
+      Alert.alert("Error", "Failed to update status");
+    } else {
+      setRejections((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, status } : r)),
+      );
+    }
+  };
+
   const handleSignOut = () => {
-    Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
-      { text: 'Cancel', style: 'cancel' },
-      { text: 'Sign Out', style: 'destructive', onPress: signOut },
+    Alert.alert("Sign Out", "Are you sure you want to sign out?", [
+      { text: "Cancel", style: "cancel" },
+      { text: "Sign Out", style: "destructive", onPress: signOut },
     ]);
   };
 
   if (loading) return <LoadingScreen />;
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: colors.background }} edges={['top']}>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 20, paddingVertical: 12 }}>
-        <Text style={{ fontSize: 24, fontFamily: fonts.accent, color: colors.primary }}>1000 Rejections</Text>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      edges={["top"]}
+    >
+      <View
+        style={{
+          flexDirection: "row",
+          justifyContent: "space-between",
+          alignItems: "center",
+          paddingHorizontal: 20,
+          paddingVertical: 12,
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 24,
+            fontFamily: fonts.accent,
+            color: colors.primary,
+          }}
+        >
+          1000 Rejections
+        </Text>
         <Pressable
           onPress={handleSignOut}
-          style={({ pressed }) => ({ paddingVertical: 6, paddingHorizontal: 12, borderRadius: 8, backgroundColor: pressed ? colors.surfaceLight : 'transparent' })}
+          style={({ pressed }) => ({
+            paddingVertical: 6,
+            paddingHorizontal: 12,
+            borderRadius: 8,
+            backgroundColor: pressed ? colors.surfaceLight : "transparent",
+          })}
         >
-          <Text style={{ fontFamily: fonts.regular, color: colors.textMuted, fontSize: 14 }}>Sign Out</Text>
+          <Text
+            style={{
+              fontFamily: fonts.regular,
+              color: colors.textMuted,
+              fontSize: 14,
+            }}
+          >
+            Sign Out
+          </Text>
         </Pressable>
       </View>
 
       <FlatList
         data={rejections}
-        keyExtractor={item => item.id}
+        keyExtractor={(item) => item.id}
         renderItem={({ item }) => (
           <RejectionCard
             rejection={item}
             onPress={() => router.push(`/(main)/rejection/${item.id}`)}
             onDelete={() => handleDelete(item.id)}
+            onStatusChange={(status) => handleStatusChange(item.id, status)}
           />
         )}
         ListHeaderComponent={
-          <>
-            <Counter count={rejections.length} />
-            <RejectionChart data={chartData} />
-            {percentile !== null && percentile >= 50 && (
-              <View style={{ marginHorizontal: 16, marginBottom: 16, padding: 16, backgroundColor: colors.celebration, borderRadius: 12 }}>
-                <Text style={{ fontSize: 16, fontFamily: fonts.bold, color: colors.primary, textAlign: 'center' }}>
-                  You're in the top {100 - percentile}% of rejection loggers!
-                </Text>
-                <Text style={{ fontSize: 14, fontFamily: fonts.regular, color: colors.text, textAlign: 'center', marginTop: 4 }}>
-                  You are fearless! 🏆
-                </Text>
-              </View>
-            )}
-          </>
+          rejections.length > 0 ? (
+            <>
+              <Counter
+                total={rejections.length}
+                pending={pendingCount}
+                rejected={rejectedCount}
+                accepted={acceptedCount}
+              />
+              <RejectionChart data={chartData} />
+              {acceptedCount > 0 && rejectedCount < acceptedCount && (
+                <View
+                  style={{
+                    marginHorizontal: 16,
+                    marginBottom: 16,
+                    padding: 16,
+                    backgroundColor: `${colors.warning}15`,
+                    borderRadius: 12,
+                    borderWidth: 1,
+                    borderColor: `${colors.warning}30`,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontFamily: fonts.bold,
+                      color: colors.warning,
+                      textAlign: "center",
+                    }}
+                  >
+                    You're not getting rejected enough!
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontFamily: fonts.regular,
+                      color: colors.textMuted,
+                      textAlign: "center",
+                      marginTop: 4,
+                    }}
+                  >
+                    Do things more outside of the box. Take bigger swings!
+                  </Text>
+                </View>
+              )}
+              {percentile !== null && percentile >= 50 && (
+                <View
+                  style={{
+                    marginHorizontal: 16,
+                    marginBottom: 16,
+                    padding: 16,
+                    backgroundColor: colors.celebration,
+                    borderRadius: 12,
+                  }}
+                >
+                  <Text
+                    style={{
+                      fontSize: 16,
+                      fontFamily: fonts.bold,
+                      color: colors.primary,
+                      textAlign: "center",
+                    }}
+                  >
+                    You're in the top {100 - percentile}% of rejection loggers!
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 14,
+                      fontFamily: fonts.regular,
+                      color: colors.text,
+                      textAlign: "center",
+                      marginTop: 4,
+                    }}
+                  >
+                    You are fearless!
+                  </Text>
+                </View>
+              )}
+            </>
+          ) : null
         }
         ListEmptyComponent={
-          <View style={{ padding: 48, alignItems: 'center' }}>
-            <Text style={{ fontSize: 18, fontFamily: fonts.bold, color: colors.text, marginBottom: 8 }}>No rejections yet</Text>
-            <Text style={{ fontSize: 16, fontFamily: fonts.regular, color: colors.textMuted, textAlign: 'center', lineHeight: 24 }}>Start your journey! Tap + to add your first rejection.</Text>
-          </View>
+          <EmptyStateOnboarding
+            onAddFirst={() => router.push("/(main)/add")}
+          />
         }
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => { setRefreshing(true); fetchRejections(); }} tintColor={colors.primary} />}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={colors.primary}
+          />
+        }
         contentContainerStyle={{ paddingBottom: 100 }}
       />
 
       <Pressable
         style={({ pressed }) => ({
-          position: 'absolute',
+          position: "absolute",
           right: 24,
           bottom: 32,
           width: 64,
           height: 64,
           borderRadius: 32,
           backgroundColor: colors.primary,
-          justifyContent: 'center',
-          alignItems: 'center',
+          justifyContent: "center",
+          alignItems: "center",
           shadowColor: colors.primary,
           shadowOffset: { width: 0, height: 4 },
           shadowOpacity: 0.4,
@@ -166,9 +304,18 @@ export default function HomeScreen() {
           elevation: 8,
           opacity: pressed ? 0.8 : 1,
         })}
-        onPress={() => router.push('/(main)/add')}
+        onPress={() => router.push("/(main)/add")}
       >
-        <Text style={{ fontSize: 32, color: colors.onPrimary, fontWeight: '300', marginTop: -2 }}>+</Text>
+        <Text
+          style={{
+            fontSize: 32,
+            color: colors.onPrimary,
+            fontWeight: "300",
+            marginTop: -2,
+          }}
+        >
+          +
+        </Text>
       </Pressable>
     </SafeAreaView>
   );

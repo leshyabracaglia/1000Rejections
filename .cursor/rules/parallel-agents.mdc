@@ -1,0 +1,10 @@
+---
+description: Prefer running multiple agents in parallel when tasks are independent
+alwaysApply: true
+---
+
+# Parallel Agent Execution
+
+When a task involves multiple independent sub-tasks (e.g. exploring different parts of the codebase, editing unrelated files, running separate searches), launch multiple agents in parallel rather than sequentially. This reduces wall-clock time and improves responsiveness.
+
+Only serialize agents when one depends on the output of another.
