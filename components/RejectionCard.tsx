@@ -44,7 +44,7 @@ export function RejectionCard({
   const borderColor = statusColors[status];
 
   const confirmDelete = () => {
-    Alert.alert("Delete Event", "Are you sure you want to delete this event?", [
+    Alert.alert("Delete Rejection", "Are you sure you want to delete this rejection?", [
       {
         text: "Cancel",
         style: "cancel",
@@ -118,6 +118,7 @@ export function RejectionCard({
             opacity: pressed ? 0.92 : 1,
           })}
           onPress={onPress}
+          onLongPress={confirmDelete}
         >
           <View
             style={{
