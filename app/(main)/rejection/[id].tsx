@@ -1,130 +1,66 @@
 import React, { useEffect, useState } from "react";
 import { View, Text, ActivityIndicator, Alert, Pressable } from "react-native";
 import { useLocalSearchParams, router } from "expo-router";
-import { supabase } from "../../../lib/supabase";
-import { useAuth } from "../../../lib/auth";
-import { RejectionForm } from "../../../components/RejectionForm";
-import { Rejection, RejectionStatus, normalizeRejection } from "../../../types";
-import * as FileSystem from "expo-file-system/legacy";
-import { decode } from "base64-arraybuffer";
+import {
+  RejectionForm,
+  RejectionFormValues,
+} from "../../../components/RejectionForm";
+import { Rejection, RejectionStatus } from "../../../types";
 import { colors, fonts } from "../../../constants/theme";
 import { Button, FormField } from "../../../components/ui";
+import { useRejections } from "../../../hooks/useRejections";
 
 const statusColors: Record<RejectionStatus, string> = {
   pending: colors.warning,
-  rejected: colors.primary,
-  accepted: colors.success,
+  rejected: colors.rejection,
+  accepted: colors.acceptance,
 };
 
 export default function EditRejectionScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const { user } = useAuth();
+  const {
+    fetchRejectionById,
+    updateRejection,
+    removeRejection,
+    updateRejectionStatus,
+  } = useRejections();
+
   const [rejection, setRejection] = useState<Rejection | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchRejection();
-  }, [id]);
-
-  const fetchRejection = async () => {
     if (!id) return;
-
-    const { data, error } = await supabase
-      .from("rejections")
-      .select("*")
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      Alert.alert("Error", "Failed to load event");
-      router.back();
-    } else {
-      setRejection(normalizeRejection(data));
-    }
-    setLoading(false);
-  };
-
-  const uploadImage = async (imageUri: string): Promise<string | null> => {
-    try {
-      const base64 = await FileSystem.readAsStringAsync(imageUri, {
-        encoding: "base64",
-      });
-
-      const fileExt = imageUri.split(".").pop()?.toLowerCase() || "jpg";
-      const fileName = `${user?.id}/${Date.now()}.${fileExt}`;
-      const contentType = fileExt === "png" ? "image/png" : "image/jpeg";
-
-      const { error } = await supabase.storage
-        .from("rejection-images")
-        .upload(fileName, decode(base64), {
-          contentType,
-        });
-
-      if (error) {
-        console.error("Upload error:", error);
-        return null;
+    fetchRejectionById(id).then((data) => {
+      if (!data) {
+        Alert.alert("Error", "Failed to load event");
+        router.back();
+      } else {
+        setRejection(data);
       }
-
-      const { data: urlData } = supabase.storage
-        .from("rejection-images")
-        .getPublicUrl(fileName);
-
-      return urlData.publicUrl;
-    } catch (error) {
-      console.error("Error uploading image:", error);
-      return null;
-    }
-  };
+      setLoading(false);
+    });
+  }, [id, fetchRejectionById]);
 
   const handleStatusChange = async (newStatus: RejectionStatus) => {
     if (!rejection) return;
 
-    const { error } = await supabase
-      .from("rejections")
-      .update({ status: newStatus })
-      .eq("id", rejection.id);
+    const oldStatus = rejection.status;
 
-    if (!error) {
-      setRejection({ ...rejection, status: newStatus });
-    } else {
+    setRejection({ ...rejection, status: newStatus });
+    const success = await updateRejectionStatus(rejection.id, newStatus);
+
+    if (!success) {
+      setRejection({ ...rejection, status: oldStatus });
       Alert.alert("Error", "Failed to update status");
     }
   };
 
-  const handleSubmit = async (values: {
-    title: string;
-    description: string;
-    date: Date;
-    imageUri: string | null;
-  }) => {
-    if (!user || !rejection) {
-      throw new Error("Invalid state");
-    }
-
-    let imageUrl: string | null = rejection.image_url;
-
-    if (values.imageUri !== rejection.image_url) {
-      if (values.imageUri && !values.imageUri.startsWith("http")) {
-        imageUrl = await uploadImage(values.imageUri);
-      } else {
-        imageUrl = values.imageUri;
-      }
-    }
-
-    const { error } = await supabase
-      .from("rejections")
-      .update({
-        title: values.title,
-        description: values.description || null,
-        date: values.date.toISOString().split("T")[0],
-        image_url: imageUrl,
-      })
-      .eq("id", rejection.id);
-
-    if (error) {
-      throw new Error(error.message);
-    }
-
+  const handleSubmit = async (values: RejectionFormValues) => {
+    if (!rejection) throw new Error("Invalid state");
+    await updateRejection(rejection.id, {
+      ...values,
+      status: rejection.status,
+    });
     router.back();
   };
 
@@ -135,12 +71,9 @@ export default function EditRejectionScreen() {
         text: "Delete",
         style: "destructive",
         onPress: async () => {
-          const { error } = await supabase
-            .from("rejections")
-            .delete()
-            .eq("id", rejection?.id);
-          if (error) Alert.alert("Error", "Failed to delete");
-          else router.back();
+          const success = await removeRejection(rejection?.id ?? "");
+          if (success) router.back();
+          else Alert.alert("Error", "Failed to delete event");
         },
       },
     ]);
@@ -204,9 +137,9 @@ export default function EditRejectionScreen() {
       <RejectionForm
         initialValues={{
           title: rejection.title,
-          description: rejection.description || "",
-          date: new Date(rejection.date),
-          imageUri: rejection.image_url,
+          description: rejection.description,
+          date: rejection.date,
+          image_url: rejection.image_url,
         }}
         onSubmit={handleSubmit}
         submitLabel="Save Changes"
@@ -215,7 +148,7 @@ export default function EditRejectionScreen() {
         label="Delete Event"
         variant="danger"
         onPress={handleDelete}
-        style={{ marginHorizontal: 16, marginBottom: 32 }}
+        style={{ marginHorizontal: 16, marginBottom: 32, marginTop: 0 }}
         textStyle={{ fontSize: 15 }}
       />
     </View>

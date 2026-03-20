@@ -37,6 +37,26 @@ yarn-error.*
 # typescript
 *.tsbuildinfo
 
+# build artifacts
+*.ipa
+*.apk
+*.aab
+
+# test coverage
+coverage/
+
+# Ruby / Bundler (Fastlane)
+vendor/
+.bundle/
+Gemfile.lock
+
+# Fastlane generated
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/
+fastlane/test_output/
+fastlane/README.md
+
 # generated native folders
 /ios
 /android

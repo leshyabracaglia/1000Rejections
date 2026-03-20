@@ -1,0 +1,40 @@
+name: Generate Screenshots
+
+on:
+  workflow_dispatch: # Manual trigger only — macOS runners are expensive
+
+jobs:
+  screenshots:
+    name: Generate App Store Screenshots
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Prebuild Expo (generates ios/ Xcode project)
+        run: npx expo prebuild --platform ios --non-interactive
+
+      - name: Setup Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.2"
+          bundler-cache: true
+
+      - name: Generate screenshots
+        run: bundle exec fastlane ios screenshots
+
+      - name: Upload screenshots
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-store-screenshots
+          path: fastlane/screenshots/
+          retention-days: 30

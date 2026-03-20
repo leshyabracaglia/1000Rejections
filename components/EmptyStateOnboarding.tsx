@@ -176,7 +176,7 @@ export function EmptyStateOnboarding({
       </View>
 
       <Button
-        label="Log your first ask"
+        label="Go get rejected"
         onPress={onAddFirst}
         style={{ marginTop: 32, marginHorizontal: 32 }}
       />

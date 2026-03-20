@@ -1,0 +1,19 @@
+# App Store required screenshot sizes
+devices([
+  "iPhone 16 Pro Max",
+  "iPhone 16 Pro",
+  "iPhone 8 Plus"
+])
+
+languages(["en-US"])
+
+# The name of the scheme in your Xcode project (after expo prebuild)
+scheme("1000Rejections")
+
+# Where to save the screenshots
+output_directory("./fastlane/screenshots")
+
+clear_previous_screenshots(true)
+
+# Stop the run if a test fails
+stop_after_first_error(false)

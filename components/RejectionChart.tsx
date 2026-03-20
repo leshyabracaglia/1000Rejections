@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Dimensions } from "react-native";
+import { View, Text, useWindowDimensions } from "react-native";
 import { LineChart } from "react-native-chart-kit";
 import { colors, fonts } from "../constants/theme";
 import { MultiLineChartData } from "../lib/chartUtils";
@@ -14,9 +14,8 @@ interface RejectionChartProps {
   data: MultiLineChartData;
 }
 
-const screenWidth = Dimensions.get("window").width;
-
 export function RejectionChart({ data }: RejectionChartProps) {
+  const { width: screenWidth } = useWindowDimensions();
   const hasData =
     data.rejections.some((v) => v > 0) ||
     data.acceptances.some((v) => v > 0) ||
@@ -42,7 +41,7 @@ export function RejectionChart({ data }: RejectionChartProps) {
           textTransform: "uppercase",
         }}
       >
-        Results Over Time
+        Rejection Progress
       </Text>
       <View style={{ flexDirection: "row", gap: 16, marginBottom: 12 }}>
         <View style={{ flexDirection: "row", alignItems: "center", gap: 6 }}>
@@ -51,7 +50,7 @@ export function RejectionChart({ data }: RejectionChartProps) {
               width: 12,
               height: 2,
               borderRadius: 1,
-              backgroundColor: colors.primary,
+              backgroundColor: colors.rejection,
             }}
           />
           <Text
@@ -70,7 +69,7 @@ export function RejectionChart({ data }: RejectionChartProps) {
               width: 12,
               height: 2,
               borderRadius: 1,
-              backgroundColor: colors.success,
+              backgroundColor: colors.acceptance,
             }}
           />
           <Text
@@ -109,12 +108,12 @@ export function RejectionChart({ data }: RejectionChartProps) {
           datasets: [
             {
               data: data.rejections,
-              color: () => colors.primary,
+              color: () => colors.rejection,
               strokeWidth: 2,
             },
             {
               data: data.acceptances,
-              color: () => colors.success,
+              color: () => colors.acceptance,
               strokeWidth: 2,
             },
             {

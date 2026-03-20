@@ -1,112 +1,166 @@
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react-native';
+import React from "react";
+import {
+  render,
+  screen,
+  fireEvent,
+  waitFor,
+} from "@testing-library/react-native";
 
-const mockSignIn = jest.fn();
+const mockSendOtp = jest.fn();
+const mockVerifyOtp = jest.fn();
 const mockReplace = jest.fn();
 
-jest.mock('../../lib/auth', () => ({
-  useAuth: () => ({ signIn: mockSignIn }),
+jest.mock("../../lib/auth", () => ({
+  useAuth: () => ({ sendOtp: mockSendOtp, verifyOtp: mockVerifyOtp }),
 }));
 
-jest.mock('expo-router', () => ({
-  router: { replace: (...args: any[]) => mockReplace(...args) },
-  Link: ({ children }: any) => children,
+jest.mock("expo-router", () => ({
+  router: { replace: (...args: unknown[]) => mockReplace(...args) },
+  Link: ({ children }: { children: React.ReactNode }) => children,
 }));
 
-import LoginScreen from '../../app/(auth)/login';
+import LoginScreen from "../../app/(auth)/login";
 
-describe('LoginScreen', () => {
+describe("LoginScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSignIn.mockResolvedValue({ error: null });
+    mockSendOtp.mockResolvedValue({ error: null });
+    mockVerifyOtp.mockResolvedValue({ error: null });
   });
 
-  it('renders form with email, password, and sign in button', () => {
+  it("renders phone number input and send code button", () => {
     render(<LoginScreen />);
-    expect(screen.getByText('1000 Rejections')).toBeTruthy();
-    expect(screen.getByText('Embrace rejection, build resilience')).toBeTruthy();
-    expect(screen.getByPlaceholderText('Email')).toBeTruthy();
-    expect(screen.getByPlaceholderText('Password')).toBeTruthy();
-    expect(screen.getByText('Sign In')).toBeTruthy();
+    expect(screen.getByText("1000 Rejections")).toBeTruthy();
+    expect(
+      screen.getByText("Embrace rejection, build resilience"),
+    ).toBeTruthy();
+    expect(screen.getByPlaceholderText("Phone Number")).toBeTruthy();
+    expect(screen.getByText("Send Code")).toBeTruthy();
   });
 
-  it('shows forgot password and sign up links', () => {
+  it("renders country code selector defaulting to +1", () => {
     render(<LoginScreen />);
-    expect(screen.getByText('Forgot password?')).toBeTruthy();
-    expect(screen.getByText('Sign Up')).toBeTruthy();
+    expect(screen.getByText("+1")).toBeTruthy();
   });
 
-  it('shows error when submitting with empty fields', async () => {
+  it("shows error when submitting empty phone", async () => {
     render(<LoginScreen />);
-    fireEvent.press(screen.getByText('Sign In'));
+    fireEvent.press(screen.getByText("Send Code"));
     await waitFor(() =>
-      expect(screen.getByText('Please enter email and password')).toBeTruthy()
+      expect(screen.getByText("Please enter your phone number")).toBeTruthy(),
     );
-    expect(mockSignIn).not.toHaveBeenCalled();
+    expect(mockSendOtp).not.toHaveBeenCalled();
   });
 
-  it('shows error when email is empty but password is filled', async () => {
+  it("calls sendOtp with country code prepended", async () => {
     render(<LoginScreen />);
-    fireEvent.changeText(screen.getByPlaceholderText('Password'), 'password123');
-    fireEvent.press(screen.getByText('Sign In'));
-    await waitFor(() =>
-      expect(screen.getByText('Please enter email and password')).toBeTruthy()
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Phone Number"),
+      "5551234567",
     );
-    expect(mockSignIn).not.toHaveBeenCalled();
-  });
-
-  it('shows error when password is empty but email is filled', async () => {
-    render(<LoginScreen />);
-    fireEvent.changeText(screen.getByPlaceholderText('Email'), 'test@example.com');
-    fireEvent.press(screen.getByText('Sign In'));
+    fireEvent.press(screen.getByText("Send Code"));
     await waitFor(() =>
-      expect(screen.getByText('Please enter email and password')).toBeTruthy()
-    );
-    expect(mockSignIn).not.toHaveBeenCalled();
-  });
-
-  it('calls signIn with trimmed email and password', async () => {
-    render(<LoginScreen />);
-    fireEvent.changeText(screen.getByPlaceholderText('Email'), '  test@example.com  ');
-    fireEvent.changeText(screen.getByPlaceholderText('Password'), 'password123');
-    fireEvent.press(screen.getByText('Sign In'));
-    await waitFor(() =>
-      expect(mockSignIn).toHaveBeenCalledWith('test@example.com', 'password123')
+      expect(mockSendOtp).toHaveBeenCalledWith("+15551234567"),
     );
   });
 
-  it('navigates to main on successful sign in', async () => {
+  it("shows OTP input after sending code", async () => {
     render(<LoginScreen />);
-    fireEvent.changeText(screen.getByPlaceholderText('Email'), 'test@example.com');
-    fireEvent.changeText(screen.getByPlaceholderText('Password'), 'password123');
-    fireEvent.press(screen.getByText('Sign In'));
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Phone Number"),
+      "5551234567",
+    );
+    fireEvent.press(screen.getByText("Send Code"));
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText("6-digit code")).toBeTruthy();
+      expect(screen.getByText("Verify")).toBeTruthy();
+    });
+  });
+
+  it("shows error when submitting empty code", async () => {
+    render(<LoginScreen />);
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Phone Number"),
+      "5551234567",
+    );
+    fireEvent.press(screen.getByText("Send Code"));
+    await waitFor(() => expect(screen.getByText("Verify")).toBeTruthy());
+
+    fireEvent.press(screen.getByText("Verify"));
     await waitFor(() =>
-      expect(mockReplace).toHaveBeenCalledWith('/(main)')
+      expect(
+        screen.getByText("Please enter the verification code"),
+      ).toBeTruthy(),
+    );
+    expect(mockVerifyOtp).not.toHaveBeenCalled();
+  });
+
+  it("calls verifyOtp with full phone and code", async () => {
+    render(<LoginScreen />);
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Phone Number"),
+      "5551234567",
+    );
+    fireEvent.press(screen.getByText("Send Code"));
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText("6-digit code")).toBeTruthy(),
+    );
+
+    fireEvent.changeText(screen.getByPlaceholderText("6-digit code"), "123456");
+    fireEvent.press(screen.getByText("Verify"));
+    await waitFor(() =>
+      expect(mockVerifyOtp).toHaveBeenCalledWith("+15551234567", "123456"),
     );
   });
 
-  it('shows error message when signIn fails', async () => {
-    mockSignIn.mockResolvedValue({ error: new Error('Invalid credentials') });
+  it("navigates to main on successful verification", async () => {
     render(<LoginScreen />);
-    fireEvent.changeText(screen.getByPlaceholderText('Email'), 'test@example.com');
-    fireEvent.changeText(screen.getByPlaceholderText('Password'), 'wrong');
-    fireEvent.press(screen.getByText('Sign In'));
-    await waitFor(() =>
-      expect(screen.getByText('Invalid credentials')).toBeTruthy()
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Phone Number"),
+      "5551234567",
     );
+    fireEvent.press(screen.getByText("Send Code"));
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText("6-digit code")).toBeTruthy(),
+    );
+
+    fireEvent.changeText(screen.getByPlaceholderText("6-digit code"), "123456");
+    fireEvent.press(screen.getByText("Verify"));
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/(main)"));
+  });
+
+  it("shows error on verification failure", async () => {
+    mockVerifyOtp.mockResolvedValue({ error: new Error("Invalid code") });
+    render(<LoginScreen />);
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Phone Number"),
+      "5551234567",
+    );
+    fireEvent.press(screen.getByText("Send Code"));
+    await waitFor(() =>
+      expect(screen.getByPlaceholderText("6-digit code")).toBeTruthy(),
+    );
+
+    fireEvent.changeText(screen.getByPlaceholderText("6-digit code"), "123456");
+    fireEvent.press(screen.getByText("Verify"));
+    await waitFor(() => expect(screen.getByText("Invalid code")).toBeTruthy());
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it('clears previous error on new submission', async () => {
-    mockSignIn.mockResolvedValueOnce({ error: new Error('Bad request') });
+  it("can go back to phone input step", async () => {
     render(<LoginScreen />);
-    fireEvent.changeText(screen.getByPlaceholderText('Email'), 'test@example.com');
-    fireEvent.changeText(screen.getByPlaceholderText('Password'), 'wrong');
-    fireEvent.press(screen.getByText('Sign In'));
-    await waitFor(() => expect(screen.getByText('Bad request')).toBeTruthy());
+    fireEvent.changeText(
+      screen.getByPlaceholderText("Phone Number"),
+      "5551234567",
+    );
+    fireEvent.press(screen.getByText("Send Code"));
+    await waitFor(() =>
+      expect(screen.getByText("Use a different number")).toBeTruthy(),
+    );
 
-    mockSignIn.mockResolvedValueOnce({ error: null });
-    fireEvent.press(screen.getByText('Sign In'));
-    await waitFor(() => expect(screen.queryByText('Bad request')).toBeNull());
+    fireEvent.press(screen.getByText("Use a different number"));
+    expect(screen.getByPlaceholderText("Phone Number")).toBeTruthy();
+    expect(screen.getByText("Send Code")).toBeTruthy();
+    expect(screen.queryByPlaceholderText("6-digit code")).toBeNull();
   });
 });

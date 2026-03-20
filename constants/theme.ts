@@ -17,7 +17,9 @@ export const colors = {
   borderSubtle: "#262626",
   success: "#4CAF50",
   warning: "#FFB74D",
-  celebration: "#2D1F3D",
+  rejection: "#4CAF50",
+  acceptance: "#BB86FC",
+  celebration: "#1B2E1B",
 };
 
 export const spacing = {

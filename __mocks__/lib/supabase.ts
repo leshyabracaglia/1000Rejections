@@ -14,14 +14,18 @@ export const supabase = {
   storage: {
     from: jest.fn(() => ({
       upload: jest.fn().mockResolvedValue({ error: null }),
-      getPublicUrl: jest.fn(() => ({ data: { publicUrl: 'https://example.com/image.jpg' } })),
+      getPublicUrl: jest.fn(() => ({
+        data: { publicUrl: "https://example.com/image.jpg" },
+      })),
     })),
   },
   auth: {
     getSession: jest.fn().mockResolvedValue({ data: { session: null } }),
-    onAuthStateChange: jest.fn(() => ({ data: { subscription: { unsubscribe: jest.fn() } } })),
-    signUp: jest.fn().mockResolvedValue({ error: null }),
-    signInWithPassword: jest.fn().mockResolvedValue({ error: null }),
+    onAuthStateChange: jest.fn(() => ({
+      data: { subscription: { unsubscribe: jest.fn() } },
+    })),
+    signInWithOtp: jest.fn().mockResolvedValue({ error: null }),
+    verifyOtp: jest.fn().mockResolvedValue({ error: null }),
     signOut: jest.fn().mockResolvedValue({ error: null }),
   },
 };

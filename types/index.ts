@@ -1,5 +1,11 @@
 export type RejectionStatus = "pending" | "rejected" | "accepted";
 
+const VALID_STATUSES: ReadonlySet<string> = new Set([
+  "pending",
+  "rejected",
+  "accepted",
+]);
+
 export interface Rejection {
   id: string;
   user_id: string;
@@ -12,21 +18,19 @@ export interface Rejection {
 }
 
 export function normalizeRejection(raw: Record<string, unknown>): Rejection {
-  return { ...(raw as Rejection), status: (raw.status as RejectionStatus) ?? "rejected" };
-}
+  const status =
+    typeof raw.status === "string" && VALID_STATUSES.has(raw.status)
+      ? (raw.status as RejectionStatus)
+      : "rejected";
 
-export interface CreateRejectionInput {
-  title: string;
-  description?: string;
-  image_url?: string;
-  date: string;
-  status?: RejectionStatus;
-}
-
-export interface UpdateRejectionInput {
-  title?: string;
-  description?: string;
-  image_url?: string | null;
-  date?: string;
-  status?: RejectionStatus;
+  return {
+    id: String(raw.id ?? ""),
+    user_id: String(raw.user_id ?? ""),
+    title: String(raw.title ?? ""),
+    description: raw.description != null ? String(raw.description) : null,
+    image_url: raw.image_url != null ? String(raw.image_url) : null,
+    date: String(raw.date ?? ""),
+    status,
+    created_at: String(raw.created_at ?? ""),
+  };
 }
