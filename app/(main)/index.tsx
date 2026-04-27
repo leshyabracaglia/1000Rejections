@@ -149,6 +149,7 @@ export default function HomeScreen() {
           onPress={handleSignOut}
           style={{ paddingVertical: 6, paddingHorizontal: 14, padding: 0 }}
           textStyle={{ fontSize: 13 }}
+          testID="sign-out-button"
         />
       </View>
 
@@ -277,6 +278,9 @@ export default function HomeScreen() {
           transform: [{ scale: pressed ? 0.95 : 1 }],
         })}
         onPress={() => router.push("/(main)/add")}
+        testID="add-rejection-button"
+        accessibilityRole="button"
+        accessibilityLabel="Get Rejected"
       >
         <Text
           style={{

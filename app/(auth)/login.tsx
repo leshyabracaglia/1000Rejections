@@ -44,58 +44,68 @@ const COUNTRY_CODES: CountryCode[] = [
   { code: "+64", label: "New Zealand", flag: "🇳🇿" },
 ];
 
+type LoginMode = "email";
+
 export default function LoginScreen() {
-  const { sendOtp, verifyOtp } = useAuth();
-  const [countryCode, setCountryCode] = useState(COUNTRY_CODES[0]);
-  const [showPicker, setShowPicker] = useState(false);
-  const [phone, setPhone] = useState("");
-  const [code, setCode] = useState("");
-  const [step, setStep] = useState<1 | 2>(1);
+  const { sendOtp, verifyOtp, signInWithEmail, signUpWithEmail } = useAuth();
+
+  // shared
+  const [mode, setMode] = useState<LoginMode>("email");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // phone flow
+  const [countryCode, setCountryCode] = useState(COUNTRY_CODES[0]);
+  const [showPicker, setShowPicker] = useState(false);
+  const [phone, setPhone] = useState("");
+  const [otpCode, setOtpCode] = useState("");
+  const [step, setStep] = useState<1 | 2>(1);
+
+  // email flow
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [emailMode, setEmailMode] = useState<"signIn" | "signUp">("signIn");
+
   const fullPhone = `${countryCode.code}${phone.trim()}`;
 
-  const handleSendCode = async () => {
-    if (!phone.trim()) {
-      return setError("Please enter your phone number");
-    }
+  const switchMode = (m: LoginMode) => {
+    setMode(m);
+    setError(null);
+    setStep(1);
+  };
 
+  // --- Phone handlers ---
+  const handleSendCode = async () => {
+    if (!phone.trim()) return setError("Please enter your phone number");
     setLoading(true);
     setError(null);
-
     const { error: authError } = await sendOtp(fullPhone);
     setLoading(false);
-
-    if (authError) {
-      setError(authError.message);
-    } else {
-      setStep(2);
-    }
+    if (authError) setError(authError.message);
+    else setStep(2);
   };
 
   const handleVerify = async () => {
-    if (!code.trim()) {
-      return setError("Please enter the verification code");
-    }
-
+    if (!otpCode.trim()) return setError("Please enter the verification code");
     setLoading(true);
     setError(null);
-
-    const { error: authError } = await verifyOtp(fullPhone, code.trim());
+    const { error: authError } = await verifyOtp(fullPhone, otpCode.trim());
     setLoading(false);
-
-    if (authError) {
-      setError(authError.message);
-    } else {
-      router.replace("/(main)");
-    }
+    if (authError) setError(authError.message);
+    else router.replace("/(main)");
   };
 
-  const handleUseDifferentNumber = () => {
-    setStep(1);
-    setCode("");
+  // --- Email handlers ---
+  const handleEmailAuth = async () => {
+    if (!email.trim() || !password.trim())
+      return setError("Please enter your email and password");
+    setLoading(true);
     setError(null);
+    const fn = emailMode === "signIn" ? signInWithEmail : signUpWithEmail;
+    const { error: authError } = await fn(email.trim(), password);
+    setLoading(false);
+    if (authError) setError(authError.message);
+    else router.replace("/(main)");
   };
 
   return (
@@ -103,36 +113,98 @@ export default function LoginScreen() {
       style={{ flex: 1, backgroundColor: colors.background }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
     >
-      <View
-        style={{ flex: 1, justifyContent: "center", paddingHorizontal: 28 }}
-      >
-        {step === 1 ? (
-          <>
-            <Text
-              style={{
-                fontSize: 32,
-                fontFamily: fonts.accent,
-                color: colors.primary,
-                textAlign: "center",
-                marginBottom: 6,
-                letterSpacing: 0.5,
-              }}
-            >
-              1000 Rejections
-            </Text>
-            <Text
-              style={{
-                fontSize: 15,
-                fontFamily: fonts.regular,
-                color: colors.textMuted,
-                textAlign: "center",
-                marginBottom: 44,
-                letterSpacing: 0.2,
-              }}
-            >
-              Embrace rejection, build resilience
-            </Text>
+      <View style={{ flex: 1, justifyContent: "center", paddingHorizontal: 28 }}>
+        <Text
+          style={{
+            fontSize: 32,
+            fontFamily: fonts.accent,
+            color: colors.primary,
+            textAlign: "center",
+            marginBottom: 6,
+            letterSpacing: 0.5,
+          }}
+        >
+          1000 Rejections
+        </Text>
+        <Text
+          style={{
+            fontSize: 15,
+            fontFamily: fonts.regular,
+            color: colors.textMuted,
+            textAlign: "center",
+            marginBottom: 32,
+            letterSpacing: 0.2,
+          }}
+        >
+          Embrace rejection, build resilience
+        </Text>
 
+
+        {/* ---- EMAIL MODE ---- */}
+        {mode === "email" && (
+          <>
+            <TextField
+              placeholder="Email"
+              value={email}
+              onChangeText={setEmail}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              autoCorrect={false}
+            />
+            <TextField
+              placeholder="Password"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
+              autoCorrect={false}
+            />
+
+            {error && (
+              <Text
+                style={{
+                  fontFamily: fonts.regular,
+                  color: colors.error,
+                  fontSize: 14,
+                  textAlign: "center",
+                  marginBottom: 16,
+                }}
+              >
+                {error}
+              </Text>
+            )}
+
+            <Button
+              label={emailMode === "signIn" ? "Sign In" : "Create Account"}
+              onPress={handleEmailAuth}
+              loading={loading}
+              testID="auth-submit-button"
+            />
+
+            <Pressable
+              style={{ alignSelf: "center", marginTop: 20 }}
+              onPress={() => {
+                setEmailMode(emailMode === "signIn" ? "signUp" : "signIn");
+                setError(null);
+              }}
+            >
+              <Text
+                style={{
+                  fontFamily: fonts.regular,
+                  color: `${colors.textMuted}99`,
+                  fontSize: 14,
+                }}
+              >
+                {emailMode === "signIn"
+                  ? "Don't have an account? Sign up"
+                  : "Already have an account? Sign in"}
+              </Text>
+            </Pressable>
+          </>
+        )}
+
+        {/* ---- PHONE MODE ---- */}
+        {mode === "phone" && step === 1 && (
+          <>
             <View style={{ flexDirection: "row", gap: 10, marginBottom: 4 }}>
               <Pressable
                 onPress={() => setShowPicker(true)}
@@ -142,7 +214,7 @@ export default function LoginScreen() {
                   backgroundColor: colors.surfaceElevated,
                   borderRadius: 12,
                   paddingHorizontal: 14,
-                  paddingVertical: 14,
+                  paddingVertical: 16,
                   borderWidth: 1,
                   borderColor: pressed ? colors.border : colors.borderSubtle,
                   gap: 6,
@@ -166,6 +238,7 @@ export default function LoginScreen() {
                   onChangeText={setPhone}
                   keyboardType="phone-pad"
                   autoCorrect={false}
+                  containerStyle={{ marginBottom: 0 }}
                 />
               </View>
             </View>
@@ -253,20 +326,25 @@ export default function LoginScreen() {
                   color: colors.error,
                   fontSize: 14,
                   textAlign: "center",
-                  marginBottom: 16,
+                  marginTop: 12,
+                  marginBottom: 4,
                 }}
               >
                 {error}
               </Text>
             )}
 
-            <Button
-              label="Send Code"
-              onPress={handleSendCode}
-              loading={loading}
-            />
+            <View style={{ marginTop: 14 }}>
+              <Button
+                label="Send Code"
+                onPress={handleSendCode}
+                loading={loading}
+              />
+            </View>
           </>
-        ) : (
+        )}
+
+        {mode === "phone" && step === 2 && (
           <>
             <Text
               style={{
@@ -286,7 +364,7 @@ export default function LoginScreen() {
                 fontFamily: fonts.regular,
                 color: colors.textMuted,
                 textAlign: "center",
-                marginBottom: 44,
+                marginBottom: 28,
                 letterSpacing: 0.2,
               }}
             >
@@ -295,8 +373,8 @@ export default function LoginScreen() {
 
             <TextField
               placeholder="6-digit code"
-              value={code}
-              onChangeText={setCode}
+              value={otpCode}
+              onChangeText={setOtpCode}
               keyboardType="number-pad"
               maxLength={6}
               autoCorrect={false}
@@ -320,7 +398,11 @@ export default function LoginScreen() {
 
             <Pressable
               style={{ alignSelf: "center", marginTop: 20 }}
-              onPress={handleUseDifferentNumber}
+              onPress={() => {
+                setStep(1);
+                setOtpCode("");
+                setError(null);
+              }}
             >
               <Text
                 style={{

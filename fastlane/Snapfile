@@ -1,19 +1,14 @@
-# App Store required screenshot sizes
+# App Store required screenshot sizes (iPad 13-inch required because supportsTablet: true)
 devices([
-  "iPhone 16 Pro Max",
-  "iPhone 16 Pro",
-  "iPhone 8 Plus"
+  "iPad Pro 13-inch (M4)"
 ])
 
 languages(["en-US"])
 
-# The name of the scheme in your Xcode project (after expo prebuild)
 scheme("1000Rejections")
+test_target_name("ScreenshotUITests")
 
-# Where to save the screenshots
 output_directory("./fastlane/screenshots")
-
 clear_previous_screenshots(true)
-
-# Stop the run if a test fails
 stop_after_first_error(false)
+override_status_bar(true)

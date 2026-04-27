@@ -4,14 +4,15 @@
   "main": "expo-router/entry",
   "scripts": {
     "start": "expo start",
-    "android": "expo start --android",
-    "ios": "expo start --ios",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest",
     "test:watch": "jest --watch",
     "test:ci": "jest --ci --coverage",
     "test:e2e": "maestro test .maestro/flows/",
-    "test:e2e:smoke": "maestro test .maestro/flows/smoke.yaml"
+    "test:e2e:smoke": "maestro test .maestro/flows/smoke.yaml",
+    "screenshots": "fastlane screenshots"
   },
   "dependencies": {
     "@expo-google-fonts/inconsolata": "^0.4.2",

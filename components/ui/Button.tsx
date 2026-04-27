@@ -19,6 +19,7 @@ interface ButtonProps {
   disabled?: boolean;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  testID?: string;
 }
 
 const variantStyles: Record<
@@ -74,6 +75,7 @@ export function Button({
   disabled = false,
   style,
   textStyle,
+  testID,
 }: ButtonProps) {
   const v = variantStyles[variant];
 
@@ -102,6 +104,9 @@ export function Button({
       ]}
       onPress={onPress}
       disabled={loading || disabled}
+      testID={testID}
+      accessibilityRole="button"
+      accessibilityLabel={label}
     >
       {loading ? (
         <ActivityIndicator

@@ -1,13 +1,89 @@
 default_platform(:ios)
 
+BUNDLE_ID        = "com.rejections.tracker"
+CREDS_FILE       = "/tmp/screenshot_creds.json"
+SCREENSHOT_EMAIL = "leshyabracaglia+test@gmail.com"
+SCREENSHOT_PASS  = "password"
+SUPABASE_URL     = "https://uslpgjjbmueosmbvmhuf.supabase.co"
+SUPABASE_ANON    = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzbHBnampibXVlb3NtYnZtaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5Njk2NjYsImV4cCI6MjA4NTU0NTY2Nn0.Jkzxql2M7GFSojxlIa_VfZOWLEvJ3HFdUrUpNoNLSpI"
+
+DEVICES = {
+  "iPhone 16 Pro Max"     => "7B8C5CF2-2B9C-4A4E-AE40-51E12D51C5D1",
+  "iPad Pro 13-inch (M4)" => "7036A1D7-680D-4839-B1FA-EF3324082B8F",
+}
+
+def reset_test_data
+  require 'json'
+
+  raw = sh("curl -sf -X POST '#{SUPABASE_URL}/auth/v1/token?grant_type=password' \
+    -H 'Content-Type: application/json' \
+    -H 'apikey: #{SUPABASE_ANON}' \
+    -d '{\"email\":\"#{SCREENSHOT_EMAIL}\",\"password\":\"#{SCREENSHOT_PASS}\"}'",
+    log: false)
+
+  data    = JSON.parse(raw)
+  token   = data['access_token']
+  user_id = data.dig('user', 'id')
+
+  UI.user_error!("Could not sign in to reset test data") unless token
+
+  sh("curl -sf -X DELETE '#{SUPABASE_URL}/rest/v1/rejections?user_id=eq.#{user_id}' \
+    -H 'Authorization: Bearer #{token}' \
+    -H 'apikey: #{SUPABASE_ANON}' \
+    -H 'Content-Type: application/json'",
+    log: false)
+
+  UI.success "Test data reset for #{SCREENSHOT_EMAIL}"
+end
+
 platform :ios do
   desc "Generate App Store screenshots"
   lane :screenshots do
-    capture_screenshots(
-      workspace: "ios/1000Rejections.xcworkspace",
-      scheme: "1000Rejections",
-      output_directory: "fastlane/screenshots",
-      clear_previous_screenshots: true
+    unless File.directory?("../ios")
+      sh("cd .. && npx expo prebuild --no-install --platform ios")
+    end
+
+    sh("env -u GEM_PATH -u GEM_HOME -u BUNDLE_GEMFILE pod install --project-directory=../ios")
+
+    output_dir = File.expand_path("../fastlane/screenshots/en-US")
+    FileUtils.mkdir_p(output_dir)
+
+    require 'json'
+    File.write(CREDS_FILE, { email: SCREENSHOT_EMAIL, password: SCREENSHOT_PASS, output_dir: output_dir }.to_json)
+
+    begin
+      DEVICES.each do |device_name, udid|
+        UI.message "📸 Taking screenshots on #{device_name}..."
+
+        reset_test_data
+
+        sh("xcrun simctl boot #{udid} 2>/dev/null || true")
+        sh("xcrun simctl bootstatus #{udid} -b")
+        sh("xcrun simctl uninstall #{udid} #{BUNDLE_ID} 2>/dev/null || true")
+
+        sh("xcodebuild test \
+          -workspace ../ios/1000Rejections.xcworkspace \
+          -scheme 1000Rejections \
+          -configuration Release \
+          -sdk iphonesimulator \
+          -destination 'platform=iOS Simulator,id=#{udid}' \
+          -only-testing:ScreenshotUITests/ScreenshotTests/testTakeScreenshots \
+          | xcpretty || true")
+      end
+    ensure
+      File.delete(CREDS_FILE) if File.exist?(CREDS_FILE)
+    end
+
+    UI.success "Screenshots saved to #{output_dir}"
+  end
+
+  desc "Upload screenshots to App Store Connect"
+  lane :upload_screenshots do
+    deliver(
+      skip_binary_upload: true,
+      skip_metadata: true,
+      screenshots_path: "./fastlane/screenshots",
+      force: true
     )
   end
 end

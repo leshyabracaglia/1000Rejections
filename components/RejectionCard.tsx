@@ -105,6 +105,8 @@ export function RejectionCard({
         friction={2}
       >
         <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={rejection.title}
           style={({ pressed }) => ({
             borderRadius: 14,
             backgroundColor: colors.surfaceElevated,

@@ -106,6 +106,8 @@ export default function EditRejectionScreen() {
               return (
                 <Pressable
                   key={s}
+                  accessibilityRole="button"
+                  testID={`status-${s}`}
                   style={({ pressed }) => ({
                     flex: 1,
                     paddingVertical: 10,
