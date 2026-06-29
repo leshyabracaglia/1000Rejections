@@ -7,7 +7,6 @@
     "development": {
       "developmentClient": true,
       "distribution": "internal",
-      "prebuildCommand": "npx expo prebuild --platform ios",
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://uslpgjjbmueosmbvmhuf.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzbHBnampibXVlb3NtYnZtaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5Njk2NjYsImV4cCI6MjA4NTU0NTY2Nn0.Jkzxql2M7GFSojxlIa_VfZOWLEvJ3HFdUrUpNoNLSpI"
@@ -15,7 +14,6 @@
     },
     "preview": {
       "distribution": "internal",
-      "prebuildCommand": "npx expo prebuild --platform ios",
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://uslpgjjbmueosmbvmhuf.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzbHBnampibXVlb3NtYnZtaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5Njk2NjYsImV4cCI6MjA4NTU0NTY2Nn0.Jkzxql2M7GFSojxlIa_VfZOWLEvJ3HFdUrUpNoNLSpI"
@@ -23,7 +21,6 @@
     },
     "production": {
       "autoIncrement": true,
-      "prebuildCommand": "npx expo prebuild --platform ios",
       "env": {
         "EXPO_PUBLIC_SUPABASE_URL": "https://uslpgjjbmueosmbvmhuf.supabase.co",
         "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVzbHBnampibXVlb3NtYnZtaHVmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk5Njk2NjYsImV4cCI6MjA4NTU0NTY2Nn0.Jkzxql2M7GFSojxlIa_VfZOWLEvJ3HFdUrUpNoNLSpI"

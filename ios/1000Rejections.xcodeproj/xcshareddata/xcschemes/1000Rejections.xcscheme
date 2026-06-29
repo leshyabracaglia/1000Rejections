@@ -20,20 +20,6 @@
                ReferencedContainer = "container:1000Rejections.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "NO"
-            buildForProfiling = "NO"
-            buildForArchiving = "NO"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A78242EAB3E3171EBD535249"
-               BuildableName = "ScreenshotUITests.xctest"
-               BlueprintName = "ScreenshotUITests"
-               ReferencedContainer = "container:1000Rejections.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
       </BuildActionEntries>
    </BuildAction>
    <TestAction
@@ -51,23 +37,6 @@
                BlueprintName = "1000RejectionsTests"
                ReferencedContainer = "container:1000Rejections.xcodeproj">
             </BuildableReference>
-         </TestableReference>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "A78242EAB3E3171EBD535249"
-               BuildableName = "ScreenshotUITests.xctest"
-               BlueprintName = "ScreenshotUITests"
-               ReferencedContainer = "container:1000Rejections.xcodeproj">
-            </BuildableReference>
-            <UITestingBuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "13B07F861A680F5B00A75B9A"
-               BuildableName = "1000Rejections.app"
-               BlueprintName = "1000Rejections"
-               ReferencedContainer = "container:1000Rejections.xcodeproj">
-            </UITestingBuildableReference>
          </TestableReference>
       </Testables>
    </TestAction>
