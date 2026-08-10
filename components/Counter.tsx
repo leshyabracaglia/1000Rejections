@@ -3,8 +3,6 @@ import { View, Text } from "react-native";
 import { colors, fonts } from "../constants/theme";
 import { Card, Divider } from "./ui";
 
-const GOAL = 1000;
-
 interface CounterProps {
   total: number;
   pending: number;
@@ -74,7 +72,6 @@ export function Counter({
   accepted,
   streak,
 }: CounterProps) {
-  const progress = Math.min(rejected / GOAL, 1);
   const resolved = rejected + accepted;
   const rejectionRate =
     resolved > 0 ? Math.round((rejected / resolved) * 100) : 0;
@@ -110,44 +107,6 @@ export function Counter({
         >
           {rejected === 1 ? "Rejection" : "Rejections"}
         </Text>
-
-        <View
-          style={{
-            width: "100%",
-            marginTop: 16,
-            alignItems: "center",
-          }}
-        >
-          <View
-            style={{
-              width: "100%",
-              height: 6,
-              borderRadius: 3,
-              backgroundColor: `${colors.rejection}15`,
-            }}
-          >
-            <View
-              style={{
-                width: `${progress * 100}%`,
-                height: 6,
-                borderRadius: 3,
-                backgroundColor: colors.rejection,
-                minWidth: rejected > 0 ? 6 : 0,
-              }}
-            />
-          </View>
-          <Text
-            style={{
-              fontSize: 11,
-              fontFamily: fonts.accentRegular,
-              color: `${colors.textMuted}99`,
-              marginTop: 6,
-              letterSpacing: 0.5,
-            }}
-          >
-            {rejected.toLocaleString()} / {GOAL.toLocaleString()}
-          </Text>
-        </View>
 
         <Divider width="100%" style={{ marginVertical: 16 }} />
 

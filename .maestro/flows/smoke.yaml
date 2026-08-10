@@ -3,7 +3,7 @@ appId: com.rejections.tracker
 # Smoke test: login -> verify home screen -> add rejection -> verify it appears -> clean up
 - launchApp
 - assertVisible:
-    text: "1000 Rejections"
+    text: "Rejection Tracker"
     timeout: 10000
 
 # Login
@@ -35,7 +35,8 @@ appId: com.rejections.tracker
     timeout: 5000
 
 # Sign out
-- tapOn: "Sign Out"
+- tapOn:
+    id: "sign-out-button"
 - assertVisible: "Are you sure?"
 - tapOn:
     text: "Sign Out"

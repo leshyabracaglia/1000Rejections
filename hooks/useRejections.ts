@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 import { supabase } from "../lib/supabase";
 import { useAuth } from "../lib/auth";
-import { Rejection, RejectionStatus, normalizeRejection } from "../types";
+import { IRejection, REJECTION_STATUS, IRejectionStatus } from "../types";
 import * as FileSystem from "expo-file-system/legacy";
 import { decode } from "base64-arraybuffer";
 import { RejectionFormValues } from "../components/RejectionForm";
@@ -49,7 +49,7 @@ export function useRejections() {
     return uploadImage(imageUri);
   };
 
-  const fetchAllRejections = useCallback(async (): Promise<Rejection[]> => {
+  const fetchAllRejections = useCallback(async (): Promise<IRejection[]> => {
     if (!user) return [];
 
     const { data, error } = await supabase
@@ -63,11 +63,11 @@ export function useRejections() {
       return [];
     }
 
-    return (data || []).map(normalizeRejection);
+    return data ?? [];
   }, [user]);
 
   const fetchRejectionById = useCallback(
-    async (id: string): Promise<Rejection | null> => {
+    async (id: string): Promise<IRejection | null> => {
       const { data, error } = await supabase
         .from("rejections")
         .select("*")
@@ -75,7 +75,7 @@ export function useRejections() {
         .single();
 
       if (error) return null;
-      return normalizeRejection(data);
+      return data;
     },
     [],
   );
@@ -91,7 +91,7 @@ export function useRejections() {
       description: values.description?.trim() || null,
       date: values.date,
       image_url: imageUrl,
-      status: "pending",
+      status: REJECTION_STATUS.PENDING,
     });
 
     if (error) throw new Error(error.message);
@@ -99,7 +99,7 @@ export function useRejections() {
 
   const updateRejection = async (
     id: string,
-    updates: Partial<RejectionFormValues> & { status?: RejectionStatus },
+    updates: Partial<RejectionFormValues> & { status?: IRejectionStatus },
   ) => {
     if (!user) throw new Error("You must be logged in");
 
@@ -125,7 +125,7 @@ export function useRejections() {
     return !error;
   };
 
-  const updateRejectionStatus = async (id: string, status: RejectionStatus) => {
+  const updateRejectionStatus = async (id: string, status: IRejectionStatus) => {
     const { error } = await supabase
       .from("rejections")
       .update({ status })
@@ -138,20 +138,12 @@ export function useRejections() {
     async (myCount: number): Promise<number | null> => {
       if (myCount === 0) return null;
 
-      const { data, error } = await supabase
-        .from("rejections")
-        .select("user_id");
-
-      if (error || !data) return null;
-
-      const userCounts: Record<string, number> = {};
-      data.forEach((r) => {
-        userCounts[r.user_id] = (userCounts[r.user_id] || 0) + 1;
+      const { data, error } = await supabase.rpc("rejection_count_percentile", {
+        my_count: myCount,
       });
 
-      const counts = Object.values(userCounts);
-      const usersWithFewer = counts.filter((c) => c < myCount).length;
-      return Math.round((usersWithFewer / counts.length) * 100);
+      if (error) return null;
+      return data;
     },
     [],
   );

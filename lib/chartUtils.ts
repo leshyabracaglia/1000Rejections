@@ -1,4 +1,4 @@
-import { Rejection } from "../types";
+import { IRejection, REJECTION_STATUS } from "../types";
 
 export interface MonthlyDataPoint {
   label: string;
@@ -12,7 +12,7 @@ export interface MonthlyDataPoint {
  * Months with no rejections get count = 0.
  */
 export function aggregateByMonth(
-  rejections: Rejection[],
+  rejections: IRejection[],
   months: number = 6,
 ): MonthlyDataPoint[] {
   const now = new Date();
@@ -49,7 +49,7 @@ export interface MultiLineChartData {
  * monthly counts for the last N months.
  */
 export function aggregateByMonthMulti(
-  events: Rejection[],
+  events: IRejection[],
   months: number = 6,
 ): MultiLineChartData {
   const now = new Date();
@@ -73,10 +73,10 @@ export function aggregateByMonthMulti(
     const monthKey = event.date.substring(0, 7);
     const idx = keyIndex.get(monthKey);
     if (idx !== undefined) {
-      const status = event.status ?? "rejected";
-      if (status === "rejected") rejections[idx]++;
-      else if (status === "accepted") acceptances[idx]++;
-      else if (status === "pending") pending[idx]++;
+      const status = event.status ?? REJECTION_STATUS.REJECTED;
+      if (status === REJECTION_STATUS.REJECTED) rejections[idx]++;
+      else if (status === REJECTION_STATUS.ACCEPTED) acceptances[idx]++;
+      else if (status === REJECTION_STATUS.PENDING) pending[idx]++;
     }
   }
 

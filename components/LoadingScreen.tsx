@@ -58,7 +58,7 @@ export function LoadingScreen() {
           letterSpacing: 1.5,
         }}
       >
-        1000 Rejections
+        Rejection Tracker
       </Text>
       <Text
         style={{

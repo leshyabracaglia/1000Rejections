@@ -7,6 +7,7 @@ import { Lato_400Regular, Lato_400Regular_Italic, Lato_700Bold } from '@expo-goo
 import { AuthProvider, useAuth } from '../lib/auth';
 import { ErrorBoundary } from '../components/ErrorBoundary';
 import { colors } from '../constants/theme';
+import { ROUTES } from '../constants/routes';
 
 function RootLayoutNav() {
   const { session, loading } = useAuth();
@@ -16,10 +17,15 @@ function RootLayoutNav() {
   useEffect(() => {
     if (loading) return;
     const inAuthGroup = segments[0] === '(auth)';
+    // The reset-password screen establishes a session from the recovery
+    // link on purpose -- don't bounce the user into the main app before
+    // they've had a chance to set a new password.
+    const isResetPasswordScreen =
+      `/(auth)/${(segments as string[])[1]}` === ROUTES.RESET_PASSWORD;
     if (!session && !inAuthGroup) {
-      router.replace('/(auth)/login');
-    } else if (session && inAuthGroup) {
-      router.replace('/(main)');
+      router.replace(ROUTES.LOGIN);
+    } else if (session && inAuthGroup && !isResetPasswordScreen) {
+      router.replace(ROUTES.MAIN);
     }
   }, [session, loading, segments]);
 

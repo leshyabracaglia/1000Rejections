@@ -1,6 +1,6 @@
 import React from "react";
-import { View } from "react-native";
 import { router } from "expo-router";
+import { SafeAreaView } from "react-native-safe-area-context";
 import {
   RejectionForm,
   RejectionFormValues,
@@ -17,8 +17,11 @@ export default function AddRejectionScreen() {
   };
 
   return (
-    <View style={{ flex: 1, backgroundColor: colors.background }}>
+    <SafeAreaView
+      style={{ flex: 1, backgroundColor: colors.background }}
+      edges={["bottom"]}
+    >
       <RejectionForm onSubmit={handleSubmit} submitLabel="Add Event" />
-    </View>
+    </SafeAreaView>
   );
 }

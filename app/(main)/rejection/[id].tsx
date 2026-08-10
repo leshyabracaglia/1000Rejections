@@ -5,15 +5,15 @@ import {
   RejectionForm,
   RejectionFormValues,
 } from "../../../components/RejectionForm";
-import { Rejection, RejectionStatus } from "../../../types";
+import { IRejection, REJECTION_STATUS, IRejectionStatus } from "../../../types";
 import { colors, fonts } from "../../../constants/theme";
 import { Button, FormField } from "../../../components/ui";
 import { useRejections } from "../../../hooks/useRejections";
 
-const statusColors: Record<RejectionStatus, string> = {
-  pending: colors.warning,
-  rejected: colors.rejection,
-  accepted: colors.acceptance,
+const statusColors: Record<IRejectionStatus, string> = {
+  [REJECTION_STATUS.PENDING]: colors.warning,
+  [REJECTION_STATUS.REJECTED]: colors.rejection,
+  [REJECTION_STATUS.ACCEPTED]: colors.acceptance,
 };
 
 export default function EditRejectionScreen() {
@@ -25,7 +25,7 @@ export default function EditRejectionScreen() {
     updateRejectionStatus,
   } = useRejections();
 
-  const [rejection, setRejection] = useState<Rejection | null>(null);
+  const [rejection, setRejection] = useState<IRejection | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -41,7 +41,7 @@ export default function EditRejectionScreen() {
     });
   }, [id, fetchRejectionById]);
 
-  const handleStatusChange = async (newStatus: RejectionStatus) => {
+  const handleStatusChange = async (newStatus: IRejectionStatus) => {
     if (!rejection) return;
 
     const oldStatus = rejection.status;
@@ -78,7 +78,7 @@ export default function EditRejectionScreen() {
       },
     ]);
 
-  if (loading)
+  if (loading) {
     return (
       <View
         style={{
@@ -91,23 +91,25 @@ export default function EditRejectionScreen() {
         <ActivityIndicator size="large" color={colors.primary} />
       </View>
     );
+  }
+
   if (!rejection) return null;
 
-  const currentStatus = rejection.status ?? "rejected";
+  const currentStatus = rejection.status ?? REJECTION_STATUS.REJECTED;
 
   return (
     <View style={{ flex: 1, backgroundColor: colors.background }}>
       <View style={{ paddingHorizontal: 16, paddingTop: 16 }}>
         <FormField label="Status">
           <View style={{ flexDirection: "row", gap: 8 }}>
-            {(["pending", "rejected", "accepted"] as const).map((s) => {
-              const isActive = currentStatus === s;
-              const color = statusColors[s];
+            {Object.values(REJECTION_STATUS).map((status) => {
+              const isActive = currentStatus === status;
+              const color = statusColors[status];
               return (
                 <Pressable
-                  key={s}
+                  key={status}
                   accessibilityRole="button"
-                  testID={`status-${s}`}
+                  testID={`status-${status}`}
                   style={({ pressed }) => ({
                     flex: 1,
                     paddingVertical: 10,
@@ -118,7 +120,7 @@ export default function EditRejectionScreen() {
                     alignItems: "center",
                     opacity: pressed ? 0.85 : 1,
                   })}
-                  onPress={() => handleStatusChange(s)}
+                  onPress={() => handleStatusChange(status)}
                 >
                   <Text
                     style={{
@@ -128,7 +130,7 @@ export default function EditRejectionScreen() {
                       letterSpacing: 0.2,
                     }}
                   >
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                    {status.charAt(0).toUpperCase() + status.slice(1)}
                   </Text>
                 </Pressable>
               );

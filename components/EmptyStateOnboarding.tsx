@@ -23,7 +23,7 @@ const STEPS = [
   {
     icon: "📈",
     title: "Watch yourself grow",
-    body: "Your counter climbs toward 1,000. Over time you'll see your chart fill up and your fear of rejection fade away.",
+    body: "Your counter climbs with every attempt. Over time you'll see your chart fill up and your fear of rejection fade away.",
   },
 ];
 
@@ -63,7 +63,7 @@ export function EmptyStateOnboarding({
           letterSpacing: -0.3,
         }}
       >
-        Welcome to 1000 Rejections
+        Welcome to Rejection Tracker
       </Text>
       <Text
         style={{
@@ -192,7 +192,7 @@ export function EmptyStateOnboarding({
           lineHeight: 20,
         }}
       >
-        You're 1 rejection closer to 1,000. Let's go!
+        Every rejection is one step closer to fearless. Let's go!
       </Text>
     </View>
   );

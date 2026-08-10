@@ -1,27 +1,27 @@
 import React, { useRef } from "react";
 import { View, Text, Pressable, Image, Alert, Animated } from "react-native";
 import Swipeable from "react-native-gesture-handler/Swipeable";
-import { Rejection, RejectionStatus } from "../types";
+import { IRejection, REJECTION_STATUS, IRejectionStatus } from "../types";
 import { colors, fonts } from "../constants/theme";
 import { Badge } from "./ui";
 
-const statusColors: Record<RejectionStatus, string> = {
-  pending: colors.warning,
-  rejected: colors.rejection,
-  accepted: colors.acceptance,
+const statusColors: Record<IRejectionStatus, string> = {
+  [REJECTION_STATUS.PENDING]: colors.warning,
+  [REJECTION_STATUS.REJECTED]: colors.rejection,
+  [REJECTION_STATUS.ACCEPTED]: colors.acceptance,
 };
 
-const statusLabels: Record<RejectionStatus, string> = {
-  pending: "Pending",
-  rejected: "Rejected",
-  accepted: "Accepted",
+const statusLabels: Record<IRejectionStatus, string> = {
+  [REJECTION_STATUS.PENDING]: "Pending",
+  [REJECTION_STATUS.REJECTED]: "Rejected",
+  [REJECTION_STATUS.ACCEPTED]: "Accepted",
 };
 
 interface RejectionCardProps {
-  rejection: Rejection;
+  rejection: IRejection;
   onPress: () => void;
   onDelete: () => void;
-  onStatusChange?: (status: RejectionStatus) => void;
+  onStatusChange?: (status: IRejectionStatus) => void;
 }
 
 export function RejectionCard({
@@ -40,7 +40,7 @@ export function RejectionCard({
     year: "numeric",
   });
 
-  const status = rejection.status ?? "rejected";
+  const status = rejection.status ?? REJECTION_STATUS.REJECTED;
   const borderColor = statusColors[status];
 
   const confirmDelete = () => {
@@ -193,7 +193,7 @@ export function RejectionCard({
               >
                 {formattedDate}
               </Text>
-              {status === "pending" && onStatusChange && (
+              {status === REJECTION_STATUS.PENDING && onStatusChange && (
                 <View style={{ flexDirection: "row", marginTop: 10, gap: 8 }}>
                   <Pressable
                     style={({ pressed }) => ({
@@ -208,7 +208,7 @@ export function RejectionCard({
                     })}
                     onPress={(e) => {
                       e.stopPropagation?.();
-                      onStatusChange("rejected");
+                      onStatusChange(REJECTION_STATUS.REJECTED);
                     }}
                   >
                     <Text
@@ -235,7 +235,7 @@ export function RejectionCard({
                     })}
                     onPress={(e) => {
                       e.stopPropagation?.();
-                      onStatusChange("accepted");
+                      onStatusChange(REJECTION_STATUS.ACCEPTED);
                     }}
                   >
                     <Text

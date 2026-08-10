@@ -30,7 +30,8 @@ function makeChain(resolvedValue: Record<string, unknown>) {
   return chain;
 }
 
-const mockFrom = jest.fn(() => makeChain({ data: null, error: null }));
+const mockFrom = jest.fn((_table: string) => makeChain({ data: null, error: null }));
+const mockRpc = jest.fn();
 const mockStorage = {
   from: jest.fn(() => ({
     upload: jest.fn().mockResolvedValue({ error: null }),
@@ -42,9 +43,10 @@ const mockStorage = {
 
 jest.mock("../../lib/supabase", () => ({
   supabase: {
-    from: (...args: unknown[]) => mockFrom(...args),
+    from: (table: string) => mockFrom(table),
     storage: mockStorage,
     auth: {},
+    rpc: (fn: string, args: unknown) => mockRpc(fn, args),
   },
 }));
 
@@ -246,7 +248,7 @@ describe("useRejections", () => {
   });
 
   describe("fetchPercentile", () => {
-    it("returns null when count is 0", async () => {
+    it("returns null when count is 0 without calling the RPC", async () => {
       const { result } = renderHook(() => useRejections());
       let pct: number | null;
       await act(async () => {
@@ -254,12 +256,11 @@ describe("useRejections", () => {
       });
 
       expect(pct!).toBeNull();
+      expect(mockRpc).not.toHaveBeenCalled();
     });
 
     it("returns null on error", async () => {
-      mockFrom.mockReturnValue(
-        makeChain({ data: null, error: { message: "fail" } }),
-      );
+      mockRpc.mockResolvedValue({ data: null, error: { message: "fail" } });
 
       const { result } = renderHook(() => useRejections());
       let pct: number | null;
@@ -270,17 +271,8 @@ describe("useRejections", () => {
       expect(pct!).toBeNull();
     });
 
-    it("calculates percentile correctly", async () => {
-      const rows = [
-        { user_id: "a" },
-        { user_id: "a" },
-        { user_id: "a" },
-        { user_id: "b" },
-        { user_id: "c" },
-        { user_id: "c" },
-      ];
-
-      mockFrom.mockReturnValue(makeChain({ data: rows, error: null }));
+    it("calls the rejection_count_percentile RPC with the caller's count", async () => {
+      mockRpc.mockResolvedValue({ data: 67, error: null });
 
       const { result } = renderHook(() => useRejections());
       let pct: number | null;
@@ -288,7 +280,9 @@ describe("useRejections", () => {
         pct = await result.current.fetchPercentile(3);
       });
 
-      // a=3, b=1, c=2 → users with fewer than 3: b(1), c(2) = 2/3 ≈ 67%
+      expect(mockRpc).toHaveBeenCalledWith("rejection_count_percentile", {
+        my_count: 3,
+      });
       expect(pct!).toBe(67);
     });
   });

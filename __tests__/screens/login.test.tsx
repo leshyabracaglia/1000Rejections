@@ -6,12 +6,17 @@ import {
   waitFor,
 } from "@testing-library/react-native";
 
-const mockSendOtp = jest.fn();
-const mockVerifyOtp = jest.fn();
+const mockSignInWithEmail = jest.fn();
+const mockSignUpWithEmail = jest.fn();
+const mockResetPasswordForEmail = jest.fn();
 const mockReplace = jest.fn();
 
 jest.mock("../../lib/auth", () => ({
-  useAuth: () => ({ sendOtp: mockSendOtp, verifyOtp: mockVerifyOtp }),
+  useAuth: () => ({
+    signInWithEmail: mockSignInWithEmail,
+    signUpWithEmail: mockSignUpWithEmail,
+    resetPasswordForEmail: mockResetPasswordForEmail,
+  }),
 }));
 
 jest.mock("expo-router", () => ({
@@ -24,143 +29,170 @@ import LoginScreen from "../../app/(auth)/login";
 describe("LoginScreen", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockSendOtp.mockResolvedValue({ error: null });
-    mockVerifyOtp.mockResolvedValue({ error: null });
+    mockSignInWithEmail.mockResolvedValue({ error: null });
+    mockSignUpWithEmail.mockResolvedValue({
+      error: null,
+      needsEmailConfirmation: false,
+    });
+    mockResetPasswordForEmail.mockResolvedValue({ error: null });
   });
 
-  it("renders phone number input and send code button", () => {
+  it("renders the email sign-in form by default", () => {
     render(<LoginScreen />);
-    expect(screen.getByText("1000 Rejections")).toBeTruthy();
+    expect(screen.getByText("Rejection Tracker")).toBeTruthy();
     expect(
       screen.getByText("Embrace rejection, build resilience"),
     ).toBeTruthy();
-    expect(screen.getByPlaceholderText("Phone Number")).toBeTruthy();
-    expect(screen.getByText("Send Code")).toBeTruthy();
+    expect(screen.getByPlaceholderText("Email")).toBeTruthy();
+    expect(screen.getByPlaceholderText("Password")).toBeTruthy();
+    expect(screen.getByText("Sign In")).toBeTruthy();
   });
 
-  it("renders country code selector defaulting to +1", () => {
+  it("shows error when submitting empty credentials", async () => {
     render(<LoginScreen />);
-    expect(screen.getByText("+1")).toBeTruthy();
-  });
-
-  it("shows error when submitting empty phone", async () => {
-    render(<LoginScreen />);
-    fireEvent.press(screen.getByText("Send Code"));
-    await waitFor(() =>
-      expect(screen.getByText("Please enter your phone number")).toBeTruthy(),
-    );
-    expect(mockSendOtp).not.toHaveBeenCalled();
-  });
-
-  it("calls sendOtp with country code prepended", async () => {
-    render(<LoginScreen />);
-    fireEvent.changeText(
-      screen.getByPlaceholderText("Phone Number"),
-      "5551234567",
-    );
-    fireEvent.press(screen.getByText("Send Code"));
-    await waitFor(() =>
-      expect(mockSendOtp).toHaveBeenCalledWith("+15551234567"),
-    );
-  });
-
-  it("shows OTP input after sending code", async () => {
-    render(<LoginScreen />);
-    fireEvent.changeText(
-      screen.getByPlaceholderText("Phone Number"),
-      "5551234567",
-    );
-    fireEvent.press(screen.getByText("Send Code"));
-    await waitFor(() => {
-      expect(screen.getByPlaceholderText("6-digit code")).toBeTruthy();
-      expect(screen.getByText("Verify")).toBeTruthy();
-    });
-  });
-
-  it("shows error when submitting empty code", async () => {
-    render(<LoginScreen />);
-    fireEvent.changeText(
-      screen.getByPlaceholderText("Phone Number"),
-      "5551234567",
-    );
-    fireEvent.press(screen.getByText("Send Code"));
-    await waitFor(() => expect(screen.getByText("Verify")).toBeTruthy());
-
-    fireEvent.press(screen.getByText("Verify"));
+    fireEvent.press(screen.getByText("Sign In"));
     await waitFor(() =>
       expect(
-        screen.getByText("Please enter the verification code"),
+        screen.getByText("Please enter your email and password"),
       ).toBeTruthy(),
     );
-    expect(mockVerifyOtp).not.toHaveBeenCalled();
+    expect(mockSignInWithEmail).not.toHaveBeenCalled();
   });
 
-  it("calls verifyOtp with full phone and code", async () => {
+  it("signs in and navigates to main on success", async () => {
     render(<LoginScreen />);
-    fireEvent.changeText(
-      screen.getByPlaceholderText("Phone Number"),
-      "5551234567",
-    );
-    fireEvent.press(screen.getByText("Send Code"));
+    fireEvent.changeText(screen.getByPlaceholderText("Email"), "a@b.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Password"), "secret1");
+    fireEvent.press(screen.getByText("Sign In"));
     await waitFor(() =>
-      expect(screen.getByPlaceholderText("6-digit code")).toBeTruthy(),
+      expect(mockSignInWithEmail).toHaveBeenCalledWith("a@b.com", "secret1"),
     );
-
-    fireEvent.changeText(screen.getByPlaceholderText("6-digit code"), "123456");
-    fireEvent.press(screen.getByText("Verify"));
-    await waitFor(() =>
-      expect(mockVerifyOtp).toHaveBeenCalledWith("+15551234567", "123456"),
-    );
-  });
-
-  it("navigates to main on successful verification", async () => {
-    render(<LoginScreen />);
-    fireEvent.changeText(
-      screen.getByPlaceholderText("Phone Number"),
-      "5551234567",
-    );
-    fireEvent.press(screen.getByText("Send Code"));
-    await waitFor(() =>
-      expect(screen.getByPlaceholderText("6-digit code")).toBeTruthy(),
-    );
-
-    fireEvent.changeText(screen.getByPlaceholderText("6-digit code"), "123456");
-    fireEvent.press(screen.getByText("Verify"));
     await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/(main)"));
   });
 
-  it("shows error on verification failure", async () => {
-    mockVerifyOtp.mockResolvedValue({ error: new Error("Invalid code") });
+  it("shows error on sign-in failure", async () => {
+    mockSignInWithEmail.mockResolvedValue({ error: new Error("Invalid login") });
     render(<LoginScreen />);
-    fireEvent.changeText(
-      screen.getByPlaceholderText("Phone Number"),
-      "5551234567",
-    );
-    fireEvent.press(screen.getByText("Send Code"));
+    fireEvent.changeText(screen.getByPlaceholderText("Email"), "a@b.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Password"), "secret1");
+    fireEvent.press(screen.getByText("Sign In"));
     await waitFor(() =>
-      expect(screen.getByPlaceholderText("6-digit code")).toBeTruthy(),
+      expect(screen.getByText("Invalid login")).toBeTruthy(),
     );
-
-    fireEvent.changeText(screen.getByPlaceholderText("6-digit code"), "123456");
-    fireEvent.press(screen.getByText("Verify"));
-    await waitFor(() => expect(screen.getByText("Invalid code")).toBeTruthy());
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it("can go back to phone input step", async () => {
+  it("switches to sign-up mode", () => {
     render(<LoginScreen />);
-    fireEvent.changeText(
-      screen.getByPlaceholderText("Phone Number"),
-      "5551234567",
-    );
-    fireEvent.press(screen.getByText("Send Code"));
-    await waitFor(() =>
-      expect(screen.getByText("Use a different number")).toBeTruthy(),
-    );
+    fireEvent.press(screen.getByText("Don't have an account? Sign up"));
+    expect(screen.getByText("Create Account")).toBeTruthy();
+  });
 
-    fireEvent.press(screen.getByText("Use a different number"));
-    expect(screen.getByPlaceholderText("Phone Number")).toBeTruthy();
-    expect(screen.getByText("Send Code")).toBeTruthy();
-    expect(screen.queryByPlaceholderText("6-digit code")).toBeNull();
+  it("signs up and navigates to main when a session is created immediately", async () => {
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText("Don't have an account? Sign up"));
+    fireEvent.changeText(screen.getByPlaceholderText("Email"), "new@b.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Password"), "secret1");
+    fireEvent.press(screen.getByText("Create Account"));
+    await waitFor(() =>
+      expect(mockSignUpWithEmail).toHaveBeenCalledWith("new@b.com", "secret1"),
+    );
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/(main)"));
+  });
+
+  it("shows a confirmation notice instead of navigating when email confirmation is required", async () => {
+    mockSignUpWithEmail.mockResolvedValue({
+      error: null,
+      needsEmailConfirmation: true,
+    });
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText("Don't have an account? Sign up"));
+    fireEvent.changeText(screen.getByPlaceholderText("Email"), "new@b.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Password"), "secret1");
+    fireEvent.press(screen.getByText("Create Account"));
+
+    await waitFor(() =>
+      expect(
+        screen.getByText(
+          "Check your email and tap the confirmation link to finish signing in.",
+        ),
+      ).toBeTruthy(),
+    );
+    // Must not navigate to the main app without a session -- that's what
+    // caused the "keeps redirecting back to sign-in" App Review bug.
+    expect(mockReplace).not.toHaveBeenCalled();
+    // Switched back to sign-in mode so the user can log in once confirmed.
+    expect(screen.getByText("Sign In")).toBeTruthy();
+  });
+
+  it("shows error on sign-up failure", async () => {
+    mockSignUpWithEmail.mockResolvedValue({
+      error: new Error("Email already registered"),
+      needsEmailConfirmation: false,
+    });
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText("Don't have an account? Sign up"));
+    fireEvent.changeText(screen.getByPlaceholderText("Email"), "new@b.com");
+    fireEvent.changeText(screen.getByPlaceholderText("Password"), "secret1");
+    fireEvent.press(screen.getByText("Create Account"));
+    await waitFor(() =>
+      expect(screen.getByText("Email already registered")).toBeTruthy(),
+    );
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("switches to forgot-password mode and hides the password field", () => {
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText("Forgot password?"));
+    expect(screen.getByText("Send Reset Link")).toBeTruthy();
+    expect(screen.queryByPlaceholderText("Password")).toBeNull();
+  });
+
+  it("sends a reset link and returns to sign-in with a confirmation notice", async () => {
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText("Forgot password?"));
+    fireEvent.changeText(screen.getByPlaceholderText("Email"), "a@b.com");
+    fireEvent.press(screen.getByText("Send Reset Link"));
+
+    await waitFor(() =>
+      expect(mockResetPasswordForEmail).toHaveBeenCalledWith("a@b.com"),
+    );
+    await waitFor(() =>
+      expect(
+        screen.getByText("Check your email for a link to reset your password."),
+      ).toBeTruthy(),
+    );
+    expect(screen.getByText("Sign In")).toBeTruthy();
+  });
+
+  it("shows an error when requesting a reset link without an email", async () => {
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText("Forgot password?"));
+    fireEvent.press(screen.getByText("Send Reset Link"));
+    await waitFor(() =>
+      expect(screen.getByText("Please enter your email")).toBeTruthy(),
+    );
+    expect(mockResetPasswordForEmail).not.toHaveBeenCalled();
+  });
+
+  it("shows error when the reset request fails", async () => {
+    mockResetPasswordForEmail.mockResolvedValue({
+      error: new Error("Too many requests"),
+    });
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText("Forgot password?"));
+    fireEvent.changeText(screen.getByPlaceholderText("Email"), "a@b.com");
+    fireEvent.press(screen.getByText("Send Reset Link"));
+    await waitFor(() =>
+      expect(screen.getByText("Too many requests")).toBeTruthy(),
+    );
+  });
+
+  it("can go back to sign-in from forgot-password mode", () => {
+    render(<LoginScreen />);
+    fireEvent.press(screen.getByText("Forgot password?"));
+    fireEvent.press(screen.getByText("Back to sign in"));
+    expect(screen.getByText("Sign In")).toBeTruthy();
+    expect(screen.getByPlaceholderText("Password")).toBeTruthy();
   });
 });

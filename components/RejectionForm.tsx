@@ -1,9 +1,16 @@
 import React, { useState } from "react";
-import { View, Text, Pressable, ScrollView, Platform } from "react-native";
+import {
+  Text,
+  Pressable,
+  ScrollView,
+  Platform,
+  KeyboardAvoidingView,
+} from "react-native";
 import DateTimePicker from "@react-native-community/datetimepicker";
 import { ImagePickerButton } from "./ImagePickerButton";
 import { colors, fonts } from "../constants/theme";
 import { Button, TextField, FormField } from "./ui";
+
 export interface RejectionFormValues {
   title: string;
   description: string | null;
@@ -67,7 +74,10 @@ export function RejectionForm({
   });
 
   return (
-    <View style={{ flex: 1 }}>
+    <KeyboardAvoidingView
+      style={{ flex: 1 }}
+      behavior={Platform.OS === "ios" ? "padding" : "height"}
+    >
       <ScrollView
         style={{ flex: 1, padding: 16 }}
         keyboardShouldPersistTaps="handled"
@@ -119,7 +129,7 @@ export function RejectionForm({
               value={date}
               mode="date"
               display={Platform.OS === "ios" ? "spinner" : "default"}
-              onChange={(event, selectedDate) => {
+              onChange={(_, selectedDate) => {
                 setShowDatePicker(Platform.OS === "ios");
                 if (selectedDate) {
                   setDate(selectedDate);
@@ -157,6 +167,6 @@ export function RejectionForm({
         loading={loading}
         style={{ marginHorizontal: 16, marginBottom: 16 }}
       />
-    </View>
+    </KeyboardAvoidingView>
   );
 }

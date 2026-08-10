@@ -1,9 +1,10 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { View, Text, FlatList, Pressable, Alert } from "react-native";
 import { useFocusEffect, router } from "expo-router";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { useAuth } from "../../lib/auth";
-import { Rejection, RejectionStatus } from "../../types";
+import { Ionicons } from "@expo/vector-icons";
+import { useAuth, consumeEmailJustVerifiedFlag } from "../../lib/auth";
+import { IRejection, IRejectionStatus, REJECTION_STATUS } from "../../types";
 import { Counter } from "../../components/Counter";
 import { RejectionCard } from "../../components/RejectionCard";
 import { LoadingScreen } from "../../components/LoadingScreen";
@@ -11,10 +12,10 @@ import { RejectionChart } from "../../components/RejectionChart";
 import { EmptyStateOnboarding } from "../../components/EmptyStateOnboarding";
 import { aggregateByMonthMulti } from "../../lib/chartUtils";
 import { colors, fonts } from "../../constants/theme";
-import { Button } from "../../components/ui";
+import { ROUTES } from "../../constants/routes";
 import { useRejections } from "../../hooks/useRejections";
 
-function calculateStreak(rejections: Rejection[]): number {
+function calculateStreak(rejections: IRejection[]): number {
   if (rejections.length === 0) return 0;
 
   const datesWithEntries = new Set(rejections.map((r) => r.date));
@@ -53,9 +54,19 @@ export default function HomeScreen() {
     fetchPercentile,
   } = useRejections();
 
-  const [rejections, setRejections] = useState<Rejection[]>([]);
+  const [rejections, setRejections] = useState<IRejection[]>([]);
   const [loading, setLoading] = useState(true);
   const [percentile, setPercentile] = useState<number | null>(null);
+
+  // Set by the login screen after it establishes a session from an email
+  // confirmation link. The lazy initializer runs exactly once on mount, so
+  // this only ever shows right after that redirect.
+  const [showEmailVerifiedBanner, setShowEmailVerifiedBanner] = useState(consumeEmailJustVerifiedFlag);
+  useEffect(() => {
+    if (!showEmailVerifiedBanner) return;
+    const timer = setTimeout(() => setShowEmailVerifiedBanner(false), 4000);
+    return () => clearTimeout(timer);
+  }, [showEmailVerifiedBanner]);
 
   const chartData = useMemo(
     () => aggregateByMonthMulti(rejections, 6),
@@ -63,12 +74,12 @@ export default function HomeScreen() {
   );
 
   const {
-    pending: pendingCount,
-    rejected: rejectedCount,
-    accepted: acceptedCount,
+    [REJECTION_STATUS.PENDING]: pendingCount,
+    [REJECTION_STATUS.REJECTED]: rejectedCount,
+    [REJECTION_STATUS.ACCEPTED]: acceptedCount,
   } = useMemo(() => {
-    const acc = { pending: 0, rejected: 0, accepted: 0 };
-    for (const r of rejections) acc[r.status]++;
+    const acc: Record<IRejectionStatus, number> = { [REJECTION_STATUS.PENDING]: 0, [REJECTION_STATUS.REJECTED]: 0, [REJECTION_STATUS.ACCEPTED]: 0 };
+    for (const r of rejections) acc[r.status ?? REJECTION_STATUS.REJECTED]++;
     return acc;
   }, [rejections]);
 
@@ -78,8 +89,8 @@ export default function HomeScreen() {
     const data = await fetchAllRejections();
     setRejections(data);
     setLoading(false);
-    const pct = await fetchPercentile(data.length);
-    setPercentile(pct);
+    const userPercentile = await fetchPercentile(data.length);
+    setPercentile(userPercentile);
   }, [fetchAllRejections, fetchPercentile]);
 
   useFocusEffect(
@@ -97,7 +108,7 @@ export default function HomeScreen() {
     }
   };
 
-  const handleStatusChange = async (id: string, status: RejectionStatus) => {
+  const handleStatusChange = async (id: string, status: IRejectionStatus) => {
     const success = await updateRejectionStatus(id, status);
     if (success) {
       setRejections((prev) =>
@@ -111,7 +122,14 @@ export default function HomeScreen() {
   const handleSignOut = () => {
     Alert.alert("Sign Out", "Are you sure you want to sign out?", [
       { text: "Cancel", style: "cancel" },
-      { text: "Sign Out", style: "destructive", onPress: signOut },
+      {
+        text: "Sign Out",
+        style: "destructive",
+        onPress: async () => {
+          await signOut();
+          router.replace(ROUTES.LOGIN);
+        },
+      },
     ]);
   };
 
@@ -134,24 +152,88 @@ export default function HomeScreen() {
         }}
       >
         <Text
+          numberOfLines={1}
           style={{
+            flexShrink: 1,
             fontSize: 22,
             fontFamily: fonts.accent,
             color: colors.primary,
             letterSpacing: 0.5,
+            marginRight: 12,
           }}
         >
-          1000 Rejections
+          Rejection Tracker
         </Text>
-        <Button
-          label="Sign Out"
-          variant="ghost"
-          onPress={handleSignOut}
-          style={{ paddingVertical: 6, paddingHorizontal: 14, padding: 0 }}
-          textStyle={{ fontSize: 13 }}
-          testID="sign-out-button"
-        />
+        <View style={{ flexDirection: "row", gap: 8 }}>
+          <Pressable
+            onPress={() => router.push(ROUTES.SETTINGS)}
+            style={({ pressed }) => ({
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: pressed ? colors.surfaceLight : colors.surfaceElevated,
+              borderWidth: 1,
+              borderColor: colors.borderSubtle,
+            })}
+            testID="account-button"
+            accessibilityRole="button"
+            accessibilityLabel="Account"
+          >
+            <Ionicons name="person-outline" size={18} color={colors.textMuted} />
+          </Pressable>
+          <Pressable
+            onPress={handleSignOut}
+            style={({ pressed }) => ({
+              width: 38,
+              height: 38,
+              borderRadius: 19,
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: pressed ? colors.surfaceLight : colors.surfaceElevated,
+              borderWidth: 1,
+              borderColor: colors.borderSubtle,
+            })}
+            testID="sign-out-button"
+            accessibilityRole="button"
+            accessibilityLabel="Sign Out"
+          >
+            <Ionicons name="log-out-outline" size={18} color={colors.textMuted} />
+          </Pressable>
+        </View>
       </View>
+
+      {showEmailVerifiedBanner && (
+        <Pressable
+          onPress={() => setShowEmailVerifiedBanner(false)}
+          style={{
+            flexDirection: "row",
+            alignItems: "center",
+            gap: 8,
+            marginHorizontal: 16,
+            marginTop: 16,
+            padding: 12,
+            backgroundColor: `${colors.success}1A`,
+            borderRadius: 12,
+            borderWidth: 1,
+            borderColor: `${colors.success}40`,
+          }}
+          testID="email-verified-banner"
+        >
+          <Ionicons name="checkmark-circle" size={20} color={colors.success} />
+          <Text
+            style={{
+              flex: 1,
+              fontFamily: fonts.bold,
+              color: colors.success,
+              fontSize: 14,
+            }}
+          >
+            Email verified! You're all set.
+          </Text>
+        </Pressable>
+      )}
 
       <FlatList
         data={rejections}
@@ -159,7 +241,7 @@ export default function HomeScreen() {
         renderItem={({ item }) => (
           <RejectionCard
             rejection={item}
-            onPress={() => router.push(`/(main)/rejection/${item.id}`)}
+            onPress={() => router.push(ROUTES.REJECTION(item.id))}
             onDelete={() => handleDelete(item.id)}
             onStatusChange={(status) => handleStatusChange(item.id, status)}
           />
@@ -253,7 +335,7 @@ export default function HomeScreen() {
           ) : null
         }
         ListEmptyComponent={
-          <EmptyStateOnboarding onAddFirst={() => router.push("/(main)/add")} />
+          <EmptyStateOnboarding onAddFirst={() => router.push(ROUTES.ADD)} />
         }
         contentContainerStyle={{ paddingBottom: 100 }}
       />
@@ -277,7 +359,7 @@ export default function HomeScreen() {
           elevation: 10,
           transform: [{ scale: pressed ? 0.95 : 1 }],
         })}
-        onPress={() => router.push("/(main)/add")}
+        onPress={() => router.push(ROUTES.ADD)}
         testID="add-rejection-button"
         accessibilityRole="button"
         accessibilityLabel="Get Rejected"

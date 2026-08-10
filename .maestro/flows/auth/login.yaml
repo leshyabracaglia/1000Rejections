@@ -1,7 +1,7 @@
 appId: com.rejections.tracker
 ---
 - launchApp
-- assertVisible: "1000 Rejections"
+- assertVisible: "Rejection Tracker"
 - assertVisible: "Sign In"
 - tapOn:
     id: "email"

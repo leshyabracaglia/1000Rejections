@@ -4,7 +4,8 @@ appId: com.rejections.tracker
 - assertVisible:
     text: "rejections this year"
     timeout: 10000
-- tapOn: "Sign Out"
+- tapOn:
+    id: "sign-out-button"
 - assertVisible: "Are you sure?"
 - tapOn:
     text: "Sign Out"

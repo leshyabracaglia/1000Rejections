@@ -22,6 +22,40 @@ export function RejectionChart({ data }: RejectionChartProps) {
     data.pending.some((v) => v > 0);
   if (!hasData) return null;
 
+  // Counts are always whole numbers, but react-native-chart-kit's default
+  // of 4 segments divides the range into fractional steps regardless (e.g.
+  // a max of 1 produces y-axis labels 0, 0.25, 0.5, 0.75, 1 -- which all
+  // round to 0/1 with decimalPlaces: 0, showing as "0, 0, 1, 1, 1"). Capping
+  // segments at the actual max value keeps every label a whole number.
+  // segments must stay >= 2: react-native-chart-kit has a special (and
+  // broken) case for segments === 1 that renders a single mislabeled tick
+  // instead of a proper 0..max scale (see AbstractChart.renderHorizontalLabels).
+  const maxValue = Math.max(
+    1,
+    ...data.rejections,
+    ...data.acceptances,
+    ...data.pending,
+  );
+  const segments = Math.min(4, Math.max(2, maxValue));
+
+  // With a small max value (e.g. 1) and segments floored at 2, the middle
+  // label (max / 2, rounded) can round to the same integer as the top label
+  // -- e.g. max=1 produces "0", "1", "1", rendered bottom-to-top. The top
+  // occurrence is the one that matters (it's exact, and it's where the data
+  // line actually reaches), so the *earlier* duplicate must be hidden, not
+  // the later one. formatYLabel has no lookahead, so the exact sequence
+  // chart-kit will produce is precomputed here to know which occurrence is
+  // last.
+  const labelSequence = Array.from({ length: segments + 1 }, (_, i) =>
+    ((maxValue / segments) * i).toFixed(0),
+  );
+  let labelCallIndex = 0;
+  const formatYLabel = (label: string) => {
+    const index = labelCallIndex++;
+    const repeatsLater = labelSequence.slice(index + 1).includes(labelSequence[index]);
+    return repeatsLater ? "" : label;
+  };
+
   return (
     <Card
       shadow="sm"
@@ -129,6 +163,8 @@ export function RejectionChart({ data }: RejectionChartProps) {
         withInnerLines={false}
         withOuterLines={false}
         fromZero
+        segments={segments}
+        formatYLabel={formatYLabel}
         chartConfig={{
           backgroundGradientFrom: colors.surfaceElevated,
           backgroundGradientTo: colors.surfaceElevated,

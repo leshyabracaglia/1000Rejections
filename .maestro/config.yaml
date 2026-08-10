@@ -2,3 +2,10 @@
 # Set these environment variables before running:
 #   TEST_USER_EMAIL - email for test account
 #   TEST_USER_PASSWORD - password for test account
+#
+# auth/delete-account.yaml permanently deletes the account it signs in
+# with, so it uses its own disposable credentials instead of the ones
+# above -- every other flow depends on TEST_USER_EMAIL continuing to
+# exist. Recreate and confirm this account before each run:
+#   TEST_DELETE_ACCOUNT_EMAIL - email for a throwaway account, deleted by the flow
+#   TEST_DELETE_ACCOUNT_PASSWORD - password for that throwaway account

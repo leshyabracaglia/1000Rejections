@@ -1,0 +1,30 @@
+appId: com.rejections.tracker
+---
+# Permanently deletes the signed-in account -- uses its OWN disposable
+# account (TEST_DELETE_ACCOUNT_EMAIL/PASSWORD), separate from every other
+# flow's TEST_USER_EMAIL/PASSWORD. Do not point this at the shared test
+# account: every other flow depends on it continuing to exist. Recreate and
+# confirm TEST_DELETE_ACCOUNT_EMAIL before each run of this flow.
+- launchApp
+- assertVisible: "Rejection Tracker"
+- assertVisible: "Sign In"
+- tapOn: "Email"
+- inputText: ${TEST_DELETE_ACCOUNT_EMAIL}
+- tapOn: "Password"
+- inputText: ${TEST_DELETE_ACCOUNT_PASSWORD}
+- tapOn: "Sign In"
+- assertVisible:
+    text: "rejections this year"
+    timeout: 10000
+- tapOn:
+    id: "account-button"
+- assertVisible: "Delete Account"
+- tapOn:
+    id: "delete-account-button"
+- assertVisible: "cannot be undone"
+- tapOn:
+    text: "Delete Account"
+    index: 1
+- assertVisible:
+    text: "Sign In"
+    timeout: 10000
